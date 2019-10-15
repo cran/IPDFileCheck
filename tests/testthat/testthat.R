@@ -547,3 +547,16 @@ test_that("testing age calculated from date of birth",{
   colnames(tempdata)<-c("name","date")
   expect_identical(suppressWarnings(calculateAgeFromDob(tempdata,"dob",0,NA)),-1)
 })
+# # # #####################################################################################################################
+
+context("testing the unique contents of a column")
+test_that("testing the unique contents of a column", {
+  x <- c('F', 'M','m','M')
+  y <- c(1,2,3,4)
+  tempdata = as.data.frame(cbind(y,x),stringsAsFactors = FALSE)
+  colnames(tempdata)<-c("number","sex")
+  expect_identical(suppressWarnings(getConentdInCols(tempdata,"sex")),c("F","M","m"))
+  expect_identical(suppressWarnings(getConentdInCols(tempdata,"number")),c(1,2,3,4))
+  expect_identical(suppressWarnings(getConentdInCols(tempdata,"gender")),-1)
+
+})

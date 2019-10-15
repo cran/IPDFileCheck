@@ -581,6 +581,7 @@ representCategoricalDataText=function(data, variable, nrcode){
 #' @return data if success -1 if failure
 #' @examples calculateAgeFromDob(data.frame("dob" = c("1987-05-28","1987-06-18")),"dob","%y-%m-%d")
 #' @export
+#' @import lubridate
 calculateAgeFromDob<-function(data,columnname,dateformat=FALSE,nrcode=NA){
   column.no=getColumnNoForNames(data,columnname)
   if (column.no<0){
@@ -769,5 +770,27 @@ calculateAgeFromBirthYear<-function(data,columnname,nrcode=NA){
       data["calc.age.yob"]<-calculated.ages
       return(data)
     }
+  }
+}
+###########################################################################################################
+#' Function to return the unique contents of the column gien the column name
+#' @param data a data frame
+#' @param colname name of column corresponding to year of birth
+#' @return the contents of the column, if success -1 if failure
+#' @examples getConentdInCols(data.frame("yob" = c(1951,1980), "Name" = c("John","Dora")),"yob")
+#' @export
+getConentdInCols<-function(data, colname){
+  #check to see if the columnname exists
+  if(checkColumnExists(colname,data)==0){
+    data<-as.data.frame(data,stringAsFactors=FALSE)
+    codes=unique(data[[colname]])
+    if(sum(is.na(suppressWarnings(as.numeric(codes))))<length(codes)){
+      return(as.numeric(codes))
+    }else{
+      return(codes)
+    }
+  }else{
+    warning("No column exists with the given name")
+    return(-1)
   }
 }

@@ -1,12 +1,12 @@
-6eabf3e76408da108530af531854c863 *DESCRIPTION
-b5fd17195c509e956cffcf253066bc61 *NAMESPACE
-6dbd90852ad4413e7f33988b00ece144 *R/IPDdataFilecheck.R
-03b4e23d0d27cfe412f33834511f95d7 *R/globals.R
-74ae2c2afb1ae23e4b2a8714891cb4d6 *README.md
+62e44f067b933c8d883b00c7e93f0f1b *DESCRIPTION
+78579c7b9e5e27a2ca5efe35f899ce17 *NAMESPACE
+9dd587a5e04445151e1a1d50ac599fb7 *R/IPDdataFilecheck.R
+ff61892e3534866c85e96bde2c61fa66 *R/globals.R
+1ab73421a75acc545088945d8714de66 *README.md
 fdab964b12f76cc7195a132983ea11ca *build/vignette.rds
 a16c0708bc24c0cf26f70ced89dc1dbc *inst/doc/User_Guide.R
-cb85946db6a21fcd6329d6af596e3e9f *inst/doc/User_Guide.Rmd
-b59b0fbacd762da1080f336a295b34a8 *inst/doc/User_Guide.html
+64d8e0d0e6aad2e4c2e7afb6f2e78699 *inst/doc/User_Guide.Rmd
+fcbb9a7a5b57f7ecf37104c4217712d6 *inst/doc/User_Guide.html
 d41d8cd98f00b204e9800998ecf8427e *inst/extdata/blank.txt
 4295667e754f0ef4522b3f74bb49402d *man/calculateAgeFromBirthYear.Rd
 928efe507a192f34b1318e56864ef711 *man/calculateAgeFromDob.Rd
@@ -17,6 +17,7 @@ b37bd2a13ad03f0d3cf2c20021affe38 *man/convertStdDateFormat.Rd
 4971e89b59bfa2d08f1e0a5c50730ba8 *man/descriptiveStatisticsDataColumn.Rd
 0fd7a4f8adc85691f9c5d5e9715f3b24 *man/getColumnNoForNames.Rd
 e3260f91afe21109030c49012e0b5edf *man/getColumnNoForPatternInColumnname.Rd
+0ffca566a1e5e544a4fef6d54136cd4a *man/getConentdInCols.Rd
 67310c6b95e258ad79d962730e471aee *man/getModeForVector.Rd
 981ea8a1c58995add152fdfbc8fa746e *man/getSEM.Rd
 2dcb2102d33345e9c621a0dedb7edbb3 *man/presentMeanSdRemoveNAText.Rd
@@ -32,5 +33,6 @@ c8ad102cb301c9302670b34b22f774ff *man/testDataColumnNames.Rd
 5c3ffbff80a850f8bb96b79495badda0 *man/testDataStringRestriction.Rd
 78b64f44eeaa3f5352d3e767af58d858 *man/testFileExistenceReadability.Rd
 6f3177856149d0319ae4b1412477da6e *man/testGender.Rd
-3ff894446e7e48deb68b71c3fa789a6f *tests/testthat/testthat.R
-cb85946db6a21fcd6329d6af596e3e9f *vignettes/User_Guide.Rmd
+aea59dec157f14631d4e8dde054f916a *tests/testthat/testthat.R
+64d8e0d0e6aad2e4c2e7afb6f2e78699 *vignettes/User_Guide.Rmd
+607d07f72740b12d031bca87a68503cb *vignettes/_gitignore

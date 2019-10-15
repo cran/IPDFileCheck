@@ -12,7 +12,7 @@
 
 <meta name="author" content="Sheeja Manchira Krishnan" />
 
-<meta name="date" content="2019-10-05" />
+<meta name="date" content="2019-10-15" />
 
 <title>User Guide</title>
 
@@ -95,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">User Guide</h1>
 <h4 class="author">Sheeja Manchira Krishnan</h4>
-<h4 class="date">2019-10-05</h4>
+<h4 class="date">2019-10-15</h4>
 
 
 
@@ -300,16 +300,16 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 <p>The function calculateAgeFromDob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘dob’ column has dates in the format “%d/%m/%y”. The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return -1 to indicate error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculateAgeFromDob</span>(rctdata,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;%d/%m/%y&quot;</span>,<span class="ot">NA</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm calc.age.dob</span>
-<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     49.82740</span>
-<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     57.63288</span>
-<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.08767</span>
-<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     50.63014</span>
-<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     58.86273</span>
-<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     49.46849</span>
-<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     22.55068</span>
-<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     31.67945</span>
-<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     29.66849</span>
-<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.02740</span>
+<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     49.85479</span>
+<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     57.66027</span>
+<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.11507</span>
+<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     50.65753</span>
+<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     58.89013</span>
+<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     49.49589</span>
+<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     22.57808</span>
+<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     31.70685</span>
+<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     29.69589</span>
+<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.05479</span>
 <span class="kw">calculateAgeFromDob</span>(rctdata_error,  <span class="st">&quot;dob&quot;</span>,<span class="dv">0</span>,<span class="ot">NA</span>)
 <span class="co">#&gt; Warning in convertStdDateFormat(entry, index, monthfirst = NULL): Date not</span>
 <span class="co">#&gt; in numeric formats</span>
