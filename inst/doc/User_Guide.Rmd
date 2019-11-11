@@ -61,111 +61,95 @@ rctdata_error <- data.frame(age=runif(10, -60, 120),
 
 #### 1. To check the file exists and readable
 
-The function testFileExistenceReadability tests if the user provided file exists and is readable. Returns 0 for success and -1 for failure. Here in the example a directory named "nodir" is generated and tested.
+The function testFileExistenceReadability tests if the user provided file exists and is readable. Returns 0 for success and errors for failures. Here in the example a directory named "nodir" is generated and tested.
 ```{r }
-  thisdir=getwd()
-  testFileExistenceReadability(thisdir)
-  nodir=paste(thisdir,"test",sep="/")
-  testFileExistenceReadability(nodir)
+  thisfile=system.file("extdata", "blank.txt", package = "IPDFileCheck")
+  testFileExistenceReadability(thisfile)
 ```
 
 ####2. To check if the column exists
-The function checkColumnExists tests if the column with  user specified column name exists in the data. For example in the above simulated data set 'rctdata', the column with column name 'sex' exists but 'gender' do not. Thus the function returns 0 when 'sex' is used while returns -1 when 'gender' is used.
+The function checkColumnExists tests if the column with  user specified column name exists in the data. For example in the above simulated data set 'rctdata', the column with column name 'sex' exists but 'gender' do not. Thus the function returns 0 when 'sex' is used while returns error when 'gender' is used.
 ```{r }
 checkColumnExists("sex",rctdata)
-checkColumnExists("gender",rctdata)
 ```
 
 ####3. To get the column number if the column name is known
-The function getColumnNoForNames returns the column number of the column with  user specified column name in the data. For example in the above simulated data set 'rctdata', the column with column name 'sex' exists and it is the 2nd column but 'gender' do not. Thus the function returns column number 2 when 'sex' is used while returns -1 when 'gender' is used.
+The function getColumnNoForNames returns the column number of the column with  user specified column name in the data. For example in the above simulated data set 'rctdata', the column with column name 'sex' exists and it is the 2nd column but 'gender' do not. Thus the function returns column number 2 when 'sex' is used while returns error when 'gender' is used.
 ```{r }
 getColumnNoForNames(rctdata,"sex")
-getColumnNoForNames(rctdata,"gender")
 ```
 
 ####4. To test column contents ie do they contain specific items in a given list?
-The function testColumnContents tests if the column contents are from a list provided by the user. The user can also give an optional code that correspond to the non response in the data.  In the simulated data shown above the column 'sex' contains 'M' and 'F' as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else -1 to indicate error.
+The function testColumnContents tests if the column contents are from a list provided by the user. The user can also give an optional code that correspond to the non response in the data.  In the simulated data shown above the column 'sex' contains 'M' and 'F' as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else indicates error.
 ```{r }
 testColumnContents(rctdata,"sex",c("M","F"),NA)
 testColumnContents(rctdata,"sex",c("M","F"))
-testColumnContents(rctdata,"sex",c("Male","Female"))
 ```
 
 ####5. To test column names of a data being different from what specified
-The function testDataColumnNames tests if the column names in the data are that provided by the user. In the simulated data 'rctdata', shown above the column 'sex' contains 'M' and 'F' as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else -1 to indicate error.
+The function testDataColumnNames tests if the column names in the data are that provided by the user. In the simulated data 'rctdata', shown above the column 'sex' contains 'M' and 'F' as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else indicates error.
 ```{r }
 testDataColumnNames(c("age","sex","dob","yob","arm"),rctdata)
-testDataColumnNames(c("arm","age","yob","dob","age"),rctdata)
-testDataColumnNames(c("arm","gender","yob","dob","age"),rctdata)
 ```
 
 ####6. To check the format of column 'age' in data
-The function testAge tests if the contents of the column 'age' is valid. User can provide the name of the column and the optional code of non response. Age should be numeric and with in limits of 0 and 150.  In the simulated data 'rctdata' the 'age' column contents are valid thus returning 0. But with the given dataset 'rctdata_error' the age can have negative numbers, such that the function returns -1 to indicate an error .
+The function testAge tests if the contents of the column 'age' is valid. User can provide the name of the column and the optional code of non response. Age should be numeric and with in limits of 0 and 150.  In the simulated data 'rctdata' the 'age' column contents are valid thus returning 0. But with the given dataset 'rctdata_error' the age can have negative numbers, such that the function returns an error .
 ```{r }
 testAge(rctdata,"age",NA)
-testAge(rctdata_error,"age",NA)
 ```
 
 ####7. To check the format of column 'gender' in data
-The function testGender tests if the contents of the gender column  is valid. User  provides the name of the gender column, how it is coded, and the optional code of non response.  In the simulated data 'rctdata' the gender column name is 'sex' and coded as 'M' and 'F'. Thus the function returns 0. but if the user tells that the gender is coded as "Male" and "Female" the function returns error -1. 
+The function testGender tests if the contents of the gender column  is valid. User  provides the name of the gender column, how it is coded, and the optional code of non response.  In the simulated data 'rctdata' the gender column name is 'sex' and coded as 'M' and 'F'. Thus the function returns 0. but if the user tells that the gender is coded as "Male" and "Female" the function returns error. 
 ```{r }
 testGender(rctdata,c("M","F"),"sex",NA)
-testGender(rctdata,c("Male","Female"),"sex",NA)
 ```
 
 ####8. To check the format of column contents -numeric or string
-The function testDataNumeric tests if the column contents are numeric. User provides the minimum and maximum values the numeric values in the column can have along with an optional code that suggests the non response. If the entries are numeric, format the function returns 0 else -1 to indicate error.  In the 'rctdata' above,The age is from 0 to 100, hence it returns 0, while the year of birth column "yob" has values greater than 100, hence returning a -1.
+The function testDataNumeric tests if the column contents are numeric. User provides the minimum and maximum values the numeric values in the column can have along with an optional code that suggests the non response. If the entries are numeric, format the function returns 0 else indicates error  In the 'rctdata' above,The age is from 0 to 100, hence it returns 0, while the year of birth column "yob" has values greater than 100, hence returning an error.
 ```{r }
 testDataNumeric("age",rctdata,NA,0,100)
-testDataNumeric("yob",rctdata,NA,0,100)
 ```
 
-The function testDataNumericNorange tests if the column contents are numeric (but with no ranges provided). User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column "arm" has no numeric data in 'rctdata', the function returns -1 to indicate error. 
+The function testDataNumericNorange tests if the column contents are numeric (but with no ranges provided). User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error As the column "arm" has no numeric data in 'rctdata', the function returns error. 
 ```{r }
 testDataNumericNorange("age",rctdata,NA)
 testDataNumericNorange("yob",rctdata,NA)
-testDataNumericNorange("arm",rctdata,NA)
 ```
 
-The function testDataString tests if the column contents are string. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column "arm" has no numeric data in 'rctdata', the function returns 0 and 'yob' with numeric data, -1 to indicate error. 
+The function testDataString tests if the column contents are string. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error As the column "arm" has no numeric data in 'rctdata', the function returns 0 and 'yob' with numeric data, indicates error. 
 ```{r }
 testDataString(rctdata,"arm",NA)
-testDataString(rctdata,"yob",NA)
 ```
 
-The function testDataStringRestriction tests if the column contents are string but with given restrictions. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column "arm" has no numeric data in 'rctdata' and they contain the entries as specified, the function returns 0. But the column 'sex' contain "M" and "F" other than "Male" and "Female".
+The function testDataStringRestriction tests if the column contents are string but with given restrictions. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error. As the column "arm" has no numeric data in 'rctdata' and they contain the entries as specified, the function returns 0. But the column 'sex' contain "M" and "F" other than "Male" and "Female".
 ```{r }
 testDataStringRestriction(rctdata,"arm",NA,c("Intervention","Control"))
 testDataStringRestriction(rctdata,"sex",NA,c("M","F"))
-testDataStringRestriction(rctdata,"sex",NA,c("Male","Female"))
 
 ```
 
-####9 To return the column number if the pattern is contained in the colnames of a data
-The function getColumnNoForPatternInColumnname returns the column number of the column with column name that contains user specified pattern in the data. For example in the above simulated data set 'rctdata', the column with column name 'dob' and 'yob' contains the pattern 'ob' and they are the 4th and 5th columns but 'gender' do not exist in the data (to return -1). 
+####9 To return column number if the pattern is contained in the column names of data
+The function getColumnNoForPatternInColumnname returns the column number of the column with column name that contains user specified pattern in the data. For example in the above simulated data set 'rctdata', the column with column name 'dob' and 'yob' contains the pattern 'ob' and they are the 4th and 5th columns but 'gender' do not exist in the data (to return error). 
 ```{r }
 getColumnNoForPatternInColumnname("ob",colnames(rctdata))
-getColumnNoForPatternInColumnname("gender",rctdata)
 
 ```
 
 ####10. To return descriptive statistics, sum, no of observations, mean, mode. median, range, standard deviation and standard error
 
-The function descriptiveStatisticsDataColumn returns the descriptive statistics of the column with the user specified column name. This includes mean, standard deviation, median, mode, standard error f the mean, minimum and maximum values to the 95% confidence intervals. If the column contents are not numeric or any error in calculating any of the quantities, the function returns -1 to indicate error. For example, the column 'age' is numeric and can return the descriptive statistics, but the column 'sex' is not. Hence the function returns -1 to indicate error.
+The function descriptiveStatisticsDataColumn returns the descriptive statistics of the column with the user specified column name. This includes mean, standard deviation, median, mode, standard error f the mean, minimum and maximum values to the 95% confidence intervals. If the column contents are not numeric or any error in calculating any of the quantities, the function returns an error. For example, the column 'age' is numeric and can return the descriptive statistics, but the column 'sex' is not. Hence the function returns an error.
 ```{r }
 descriptiveStatisticsDataColumn(rctdata, "age")
-descriptiveStatisticsDataColumn(rctdata, "sex")
 ```
 
 ####11. To present the mean and sd of a data set in the form Mean (SD)
-The function presentMeanSdRemoveNAText returns the mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns -1 to indicate error. For example, the column 'age' is numeric and can return the mean and SD, but the column 'sex' is not. Hence the function returns -1 to indicate error.
+The function presentMeanSdRemoveNAText returns the mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns an error. For example, the column 'age' is numeric and can return the mean and SD, but the column 'sex' is not. Hence the function returns an error.
 ```{r }
 presentMeanSdRemoveNAText(rctdata, "age")
-presentMeanSdRemoveNAText(rctdata, "sex")
 ```
 
 ####12. To return a subgroup when certain variable equals the given value while omitting those with NA
-The function returnSubgroupOmitNA returns the subgroup using the user defined condition while omitting any non response values. mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns -1 to indicate error. For example, the first command below gives all the female in the data, while the second command retrieves all those in control arm.
+The function returnSubgroupOmitNA returns the subgroup using the user defined condition while omitting any non response values. mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns an error. For example, the first command below gives all the female in the data, while the second command retrieves all those in control arm.
 ```{r }
 returnSubgroupOmitNA(rctdata, "sex","F")
 returnSubgroupOmitNA(rctdata, "arm","control")
@@ -180,10 +164,9 @@ representCategoricalDataText(rctdata, "arm",NA)
 
 ####14. To calculate age from date of birth and year of birth
 
-The function calculateAgeFromDob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the 'rctdata' shown above, the 'dob' column has dates in the format "%d/%m/%y". The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return -1 to indicate error.
+The function calculateAgeFromDob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the 'rctdata' shown above, the 'dob' column has dates in the format "%d/%m/%y". The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return  an error.
 ```{r }
 calculateAgeFromDob(rctdata,"dob","%d/%m/%y",NA)
-calculateAgeFromDob(rctdata_error,  "dob",0,NA)
 ```
 
 The function calculateAgeFromBirthYear returns the age calculated from given year of birth. User may provide the column name containing date of birth and optional non response code.For example, in the 'rctdata' shown above, the 'yob' column has birth year.

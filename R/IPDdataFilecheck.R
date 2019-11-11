@@ -6,24 +6,26 @@
 #' @export
 checkLoadPackages<-function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg)){
-    install.packages(new.pkg, lib=.libPaths(), repos = getOption("repos"),
-                     contriburl = contrib.url(repos="https://cran.rstudio.com/", type=getOption("pkgType")),
-                     method="auto", available = NULL, destdir = NULL,
-                     dependencies = TRUE, type = getOption("pkgType"),
-                     configure.args = getOption("configure.args"),
-                     configure.vars = getOption("configure.vars"),
-                     clean = FALSE, Ncpus = getOption("Ncpus", 1L),
-                     verbose = getOption("verbose"),
-                     libs_only = FALSE, INSTALL_opts, quiet = FALSE,
-                     keep_outputs = FALSE)
+  list_packages<-available.packages(contriburl = contrib.url(repos = "http://cran.us.r-project.org", type=getOption("pkgType")))
+  if(length(new.pkg)>=1){
+      if(new.pkg%in%list_packages){
+        suppressWarnings(install.packages(new.pkg, lib=.libPaths(), repos = "http://cran.us.r-project.org",
+                         contriburl = contrib.url(repos = "http://cran.us.r-project.org", type=getOption("pkgType")),
+                         method="auto", available = NULL, destdir = NULL,
+                         dependencies = TRUE, type = getOption("pkgType"),
+                         configure.args = getOption("configure.args"),
+                         configure.vars = getOption("configure.vars"),
+                         clean = FALSE, Ncpus = getOption("Ncpus", 1L),
+                         verbose = getOption("verbose"),
+                         libs_only = FALSE, INSTALL_opts, quiet = FALSE,
+                         keep_outputs = FALSE))
+      }else{
+        stop("Invalid package ")
+      }
   }
-  if(!sapply(pkg, require, character.only = TRUE)){
-    warning("Invalid package ")
-    return(-1)
-  }else{
-    return(0)
-  }
+  valid=pkg[(pkg %in% list_packages)]
+  sapply(valid, require, character.only = TRUE)
+  return(0)
 }
 
 ###########################################################################################################
@@ -35,13 +37,13 @@ checkLoadPackages<-function(pkg){
 testFileExistenceReadability<-function(filename){
   if (file.exists(filename)){
     if (file.access(filename, 0)!=0){
-      warning(" Error reading file")
-      return(-2)
+      stop("Error reading file")
+      ##return(-2)
     }
     return(0)
   }else{
-    warning(" Invalid directory or file")
-    return(-1)
+    stop("Invalid directory or file")
+    ##return(-1)
   }
 }
 ###########################################################################################################
@@ -57,8 +59,8 @@ testDataColumnNames<-function(column.names,data){
   if (sum(upper.given.colnames==upper.data.colnames)==length(column.names)){
     return(0)
   }else{
-    warning(" One or other column may have different names")
-    return(-1)
+    stop("One or other column may have different names")
+    ##return(-1)
   }
 }
 ###########################################################################################################
@@ -67,13 +69,13 @@ testDataColumnNames<-function(column.names,data){
 #' @param agecolumn column name that corresponds to age or date pf birth
 #' @param nrcode non response code corresponding to age column
 #' @return 0, if success -1 if failure
-#' @examples testAge(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",999)
+#' @examples testAge(data.frame("Age"= c(21,15), "Name"= c("John","Dora")),"age",999)
 #' @export
 testAge=function(data,agecolumn="age",nrcode=NA){
   column.no=getColumnNoForNames(data,agecolumn)
   if (column.no<0){
-    warning("Column name age does not exist")
-    return(-1)
+    stop("Column name age does not exist")
+    ##return(-1)
   }else{
     entry <-data[[column.no]]
     blanks=c(which(entry==""),which(is.na(entry)))
@@ -86,8 +88,8 @@ testAge=function(data,agecolumn="age",nrcode=NA){
       newentry <- as.numeric(entry[ which(entry!=nrcode)])
     }
     if (any(newentry>150 ) || any(newentry<0)){
-      warning(" Invalid entry in age column")
-      return(-2)
+      stop("Invalid entry in age column")
+      ##return(-2)
     }else{
       return(0)
     }
@@ -100,7 +102,7 @@ testAge=function(data,agecolumn="age",nrcode=NA){
 #' @param data a data frame
 #' @param column.name column names of the data frame
 #' @return column number, if success -1, if failure
-#' @examples getColumnNoForNames(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"Name")
+#' @examples getColumnNoForNames(data.frame("Age"= c(21,15), "Name"= c("John","Dora")),"Name")
 #' @export
 getColumnNoForNames=function(data,column.name){
   data.column.names = toupper(colnames(data))
@@ -108,8 +110,8 @@ getColumnNoForNames=function(data,column.name){
     column.no=which(data.column.names==toupper(column.name))
     return(column.no)
   }else{
-    warning("Column name does not exist")
-    return(-1)
+    stop("Column name does not exist")
+    ##return(-1)
   }
 }
 ###########################################################################################################
@@ -119,14 +121,14 @@ getColumnNoForNames=function(data,column.name){
 #' @param gendercode how gender is coded
 #' @param nrcode non response code corresponding to gender column
 #' @return 0, if success -1 if failure
-#' @examples testGender(data.frame("sex" = c("m","f"), "Name" = c("John","Dora")),c("f", "m"),"sex",999)
+#' @examples testGender(data.frame("sex"= c("m","f"), "Name"= c("John","Dora")),c("f", "m"),"sex",999)
 #' @export
 testGender=function(data,gendercode,gendercolumn="gender",nrcode=NA){
   gendercode<-toupper(gendercode)
   column.no=getColumnNoForNames(data,gendercolumn)
   if (column.no<0){
-      warning(" Column name for ender does not exist")
-     return(-1)
+     stop("Column name for ender does not exist")
+     #return(-1)
   }
   if (column.no>0){
     entry <- data[column.no]
@@ -141,8 +143,8 @@ testGender=function(data,gendercode,gendercolumn="gender",nrcode=NA){
     if (all(facs%in%gendercode)){
         return(0)
     }else{
-      warning(" Invalid entry in gender column")
-      return(-2)
+      stop("Invalid entry in gender column")
+      #return(-2)
     }
   }
 }
@@ -153,13 +155,13 @@ testGender=function(data,gendercode,gendercolumn="gender",nrcode=NA){
 #' @param code how column values are  coded
 #' @param nrcode non response code corresponding to gender column
 #' @return 0, if success -1 if failure
-#' @examples testColumnContents(data.frame("sex" = c("m","f"), "Name" = c("John","Dora")),"sex",c("m","f"),999)
+#' @examples testColumnContents(data.frame("sex"= c("m","f"), "Name"= c("John","Dora")),"sex",c("m","f"),999)
 #' @export
 testColumnContents=function(data,column,code,nrcode=NA){
   column.no=getColumnNoForNames(data,column)
   if (column.no<0){
-    warning("Column name does not exist")
-    return(-1)
+    stop("Column name does not exist")
+    #return(-1)
   }
   if (column.no>0){
     entry <- data[column.no]
@@ -174,8 +176,8 @@ testColumnContents=function(data,column,code,nrcode=NA){
     if (all(facs%in%code)){
       return(0)
     }else{
-      warning("Invalid entry in column")
-      return(-2)
+      stop("Invalid entry in column")
+      #return(-2)
     }
   }
 }
@@ -192,8 +194,8 @@ testColumnContents=function(data,column,code,nrcode=NA){
 testDataNumeric=function(column.name,data,nrcode=NA, minval, maxval){
   column.no=getColumnNoForNames(data,column.name)
   if (column.no<0){
-    warning(" Column name does not exist")
-    return(-1)
+    stop("Column name does not exist")
+    ##return(-1)
   }else{
     entry <-(data[[column.no]])
     if (is.na(nrcode)){
@@ -203,14 +205,14 @@ testDataNumeric=function(column.name,data,nrcode=NA, minval, maxval){
     }
     if (is.numeric(new.entry)){
       if (any(new.entry<minval) || any(new.entry>maxval)){
-        warning(" Invalid ranges in column")
-        return(-2)
+        stop("Invalid ranges in column")
+        #return(-2)
       }else{
         return(0)
       }
     }else{
-      warning(" Non numeric values in column")
-      return(-3)
+      stop("Non numeric values in column")
+      #return(-3)
     }
   }
 }
@@ -225,8 +227,8 @@ testDataNumeric=function(column.name,data,nrcode=NA, minval, maxval){
 testDataNumericNorange=function(column.name,data,nrcode=NA){
   column.no=getColumnNoForNames(data,column.name)
   if (column.no<0){
-    warning(" Column name does not exist")
-    return(-1)
+    stop("Column name does not exist")
+    #return(-1)
   }else{
     entry <-unlist(data.frame(data[[column.no]],stringsAsFactors = FALSE))
     if (is.na(nrcode)){
@@ -238,8 +240,8 @@ testDataNumericNorange=function(column.name,data,nrcode=NA){
     if (is.numeric(no.nrcode.entries)){
       return(0)
     }else{
-      warning("Some values-other than NR code is not numeric")
-      return(-2)
+      stop("Some values-other than NR code is not numeric")
+      #return(-2)
     }
   }
 }
@@ -257,11 +259,12 @@ testDataStringRestriction=function(data,column.name,nrcode=NA,allowed.strings){
   if (res==0){
     column.no=getColumnNoForNames(data,column.name)
     if (column.no<0){
-      return(-1)
-      warning("column name does not exist")
+      #return(-1)
+      stop("column name does not exist")
     }else{
       if (length(allowed.strings)>=1){
-        entry <- dplyr::mutate_all(data[column.no], dplyr::funs(toupper))
+        entry <-toupper(data[[column.no]])
+        #entry <- dplyr::mutate_all(data[column.no], dplyr::funs(toupper))
         if (!is.na(nrcode)){
           new.entry=entry[entry!=nrcode]
         }else{
@@ -269,24 +272,24 @@ testDataStringRestriction=function(data,column.name,nrcode=NA,allowed.strings){
         }
         if (any(is.na(new.entry)==TRUE) || sum(toupper(allowed.strings)%in%unique(new.entry))
             <length(unique(new.entry))){
-          warning(" Invalid entry in column")
-          return(-2)
+          stop("Invalid entry in column")
+          #return(-2)
         }else{
           return(0)
         }
       }else{
-        warning("Please provide the restriction on allowed strings, else use testDataString(..)")
-        return(-3)
+        stop("Please provide the restriction on allowed strings, else use testDataString(..)")
+        #return(-3)
       }
     }
   }else{
     if(res==-1){
-      warning(" Column name does not exist")
-      return(-4)
+      stop("Column name does not exist")
+      #return(-4)
     }
     if(res==-2){
-      warning("atleast one non string entry in column")
-      return(-5)
+      stop("atleast one non string entry in column")
+      #return(-5)
     }
 
   }
@@ -302,8 +305,8 @@ testDataStringRestriction=function(data,column.name,nrcode=NA,allowed.strings){
 testDataString=function(data,column.name,nrcode=NA){
   column.no=getColumnNoForNames(data,column.name)
   if (column.no<0){
-    warning("Column name does not exist")
-    return(-1)
+    stop("Column name does not exist")
+    #return(-1)
   }else{
     temp=data[column.no]
     temp=unlist(temp[!is.na(temp)])
@@ -314,24 +317,38 @@ testDataString=function(data,column.name,nrcode=NA){
     }
     new.entry=suppressWarnings(as.numeric(as.character(new.entry)))
     if (any(!is.na(new.entry))){
-      warning(" Numeric entry in column")
-      return(-2)
+      stop("Numeric entry in column")
+      #return(-2)
     }else{
       return(0)
     }
   }
 }
 ###########################################################################################################
-#' Function to return the column number if a given attern is contained in the column names of a data
+#' Function to return the column number if a given pattern is contained in the column names of a data
 #' @param pattern a string that needs to be checked
 #' @param column.names column names actually have
 #' @return column number, if success -1, if failure
 #' @examples getColumnNoForPatternInColumnname("age","female_age")
 #' @export
 getColumnNoForPatternInColumnname=function(pattern,column.names){
+  if(checkColumnNoForPatternInColumnname(pattern,column.names)==TRUE){
+    test=grep(toupper(pattern),toupper(column.names))
+    return(test)
+  }else{
+    stop("The pattern does not form any part of columnnames")
+  }
+}
+###########################################################################################################
+#' Function to return the column number if a given pattern is contained in the column names of a data
+#' @param pattern a string that needs to be checked
+#' @param column.names column names actually have
+#' @return TRUE , if success FALSE, if failure
+#' @examples checkColumnNoForPatternInColumnname("age","female_age")
+#' @export
+checkColumnNoForPatternInColumnname=function(pattern,column.names){
   if (is.na(pattern) || pattern==""){
-    warning("Error pattern NA or empty")
-    return(-1)
+    stop("Error pattern NA or empty")
   }else{
     if (is.numeric(pattern)){
       test=grep(toString(pattern),toupper(column.names))
@@ -339,10 +356,9 @@ getColumnNoForPatternInColumnname=function(pattern,column.names){
       test=grep(toupper(pattern),toupper(column.names))
     }
     if (length(test)==0){
-      warning(" The pattern does not form any part of columnnames")
-      return(-2)
+      return(FALSE)
     }else{
-      return(test)
+      return(TRUE)
     }
   }
 }
@@ -352,15 +368,15 @@ getColumnNoForPatternInColumnname=function(pattern,column.names){
 #' @param column.name the column name
 #' @param nrcode non response code corresponding to the column
 #' @return the descriptive statistics for success , -1 for failure
-#' @examples descriptiveStatisticsDataColumn(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
+#' @examples descriptiveStatisticsDataColumn(data.frame("age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
 #' @import stats
 #' @export
 descriptiveStatisticsDataColumn=function(data,column.name, nrcode=NA){
   col.names=colnames(data)
   if (column.name%in%col.names){
     if (testDataNumericNorange(column.name,data,nrcode)!=0){
-      warning("Non numeric columns, cant estimate the descriptive statistics")
-      return(-1)
+      stop("Non numeric columns, cant estimate the descriptive statistics")
+      #return(-1)
     }else{
       this.column=data[column.name]
       if (is.na(nrcode)){
@@ -387,8 +403,8 @@ descriptiveStatisticsDataColumn=function(data,column.name, nrcode=NA){
       return(results)
     }
   }else{
-    warning("Error - no column or column name different")
-    return(-2)
+    stop("Error - no column or column name different")
+    #return(-2)
   }
 }
 ###########################################################################################################
@@ -402,8 +418,8 @@ getModeForVector <- function(v) {
     uniqv <- unique(v)
     uniqv[which.max(tabulate(match(v, uniqv)))]
   }else{
-    warning("Non numeric data")
-    return(-1)
+    stop("Non numeric data")
+    #return(-1)
   }
 }
 ###########################################################################################################
@@ -417,8 +433,8 @@ checkColumnExists<-function(column.name,data){
   if(any(toupper(colnames(data))==toupper(column.name))){
     return(0)
   }else{
-    warning("Data does not contain the column with the specfied column name")
-    return(-1)
+    stop("Data does not contain the column with the specfied column name")
+    #return(-1)
   }
 }
 
@@ -429,13 +445,13 @@ checkColumnExists<-function(column.name,data){
 #' @param column.name the column name
 #' @param nrcode non response code corresponding to the column
 #' @return the mean(sd), -1 for failure
-#' @examples presentMeanSdRemoveNAText(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
+#' @examples presentMeanSdRemoveNAText(data.frame("age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
 #' @export
 presentMeanSdRemoveNAText=function(data,column.name,nrcode=NA){
   desc=descriptiveStatisticsDataColumn(data,column.name,nrcode)
   if(length(desc)==1 & desc[1]==-1){
-    warning("Error or no data to analyse ")
-    return(-1)
+    stop("Error or no data to analyse ")
+    #return(-1)
   }else{
     desc=data.frame(desc)
     this.mean=as.numeric(desc$Mean)
@@ -461,8 +477,8 @@ returnSubgroupOmitNA=function(data,variable,value){
       subgroup = data[which(data[column.no]==value & !is.na(data[column.no])),]
       return(subgroup)
   }else{
-    warning("No column exists")
-    return(-1)
+    stop("No column exists")
+    #return(-1)
   }
 }
 ###########################################################################################################
@@ -473,8 +489,8 @@ returnSubgroupOmitNA=function(data,variable,value){
 #' @examples cohensD(c(1,2,3,4),c(3,4,5,6))
 #' @export
 cohensD<- function(x, y) {
-  xx<-as.numeric(x)
-  yy<-as.numeric(y)
+  xx<-suppressWarnings(as.numeric(x))
+  yy<-suppressWarnings(as.numeric(y))
   xnotna=sum(!is.na(xx))
   ynotna=sum(!is.na(yy))
   if(xnotna==length(x) && xnotna==length(y)){
@@ -489,8 +505,8 @@ cohensD<- function(x, y) {
     ans = c(cd,cd-1.96*sqrt(var_d),cd+1.96*sqrt(var_d) )
     return(ans)
   }else{
-    warning("Vector contains atleast one NA or string")
-    return(-1)
+    stop("Vector contains atleast one NA or string")
+    #return(-1)
   }
 }
 ###########################################################################################################
@@ -501,10 +517,10 @@ cohensD<- function(x, y) {
 #' @export
 ## estimate standard error of th mean and return
 getSEM <- function(x){
-  xx<-as.numeric(x)
+  xx<-suppressWarnings(as.numeric(x))
   if(sum(is.na(xx))>0){
-    warning("Vector contains non numeric data")
-    return(-1)
+    stop("Vector contains non numeric data")
+    #return(-1)
   }else{
     ans<-sd(x)/sqrt(length(x))
     return(ans)
@@ -546,8 +562,8 @@ representCategoricalData<-function(data,variable,nrcode=NA) {
     }
     return(ans)
   }else{
-    warning("No column exists")
-    return(-1)
+    stop("No column exists")
+    #return(-1)
   }
 }
 ###########################################################################################################
@@ -579,14 +595,17 @@ representCategoricalDataText=function(data, variable, nrcode){
 #' @param dateformat format of date e.g. dmy default is FALSE
 #' @param nrcode non response code corresponding to date of birth
 #' @return data if success -1 if failure
-#' @examples calculateAgeFromDob(data.frame("dob" = c("1987-05-28","1987-06-18")),"dob","%y-%m-%d")
+#' @examples
+#' library(IPDFileCheck)
+#' calculateAgeFromDob(data.frame("dob"=c("1987-05-28","1987-06-18","1987-07-09"),
+#' "num"=c(1,2,3),stringsAsFactors = FALSE),"dob")
+#' @importFrom eeptools age_calc
 #' @export
-#' @import lubridate
 calculateAgeFromDob<-function(data,columnname,dateformat=FALSE,nrcode=NA){
   column.no=getColumnNoForNames(data,columnname)
   if (column.no<0){
-    warning("Column name for date of birth does not exist")
-    return(-1)
+    stop("Column name for date of birth does not exist")
+    #return(-1)
   }else{
     data <-as.data.frame(data,string.as.factors=FALSE)
     entry<-data[[column.no]]
@@ -621,21 +640,20 @@ calculateAgeFromDob<-function(data,columnname,dateformat=FALSE,nrcode=NA){
       }
     }
 
-    an.error.occured <- FALSE
-    tryCatch( { result <- eeptools::age_calc(as.Date(mod.entry[index]), units='years')}
-              , error = function(e) {an.error.occured <<- TRUE})
-    if(an.error.occured==FALSE){
-      calculated.ages[index]<-result
-      calculated.ages[blanks]<-NA
-      nonNAages<-calculated.ages[!is.na(calculated.ages)]
-    }else{
-      warning(" Date format is not right- use numeric values for dates separated by - or /")
-      return(-2)
-    }
+    result <- eeptools::age_calc(as.Date(mod.entry[index]), units='years')
+    # tryCatch( { result <- eeptools::age_calc(as.Date(mod.entry[index]), units='years')}
+    #           , error = function(e) {an.error.occured =TRUE})
 
+    calculated.ages[index]<-result
+    calculated.ages[blanks]<-NA
+    nonNAages<-calculated.ages[!is.na(calculated.ages)]
+    # }else{
+    #   stop("Date format is not right- use numeric values for dates separated by - or /")
+    #   #return(-2)
+    # }
     if (any(nonNAages>150 ) || any(nonNAages<0)){
-      warning(" Age can not be negative OR greater than 150")
-      return(-3)
+      stop("Age can not be negative OR greater than 150")
+      #return(-3)
     }else{
       data["calc.age.dob"]<-calculated.ages
       return(data)
@@ -719,13 +737,13 @@ convertStdDateFormat<-function(entry, index,monthfirst=NULL){
         }
 
       }else{
-        warning("Error-no year shown in date")
-        return(-1)
+        stop("Error-no year shown in date")
+        #return(-1)
       }
     }
   }else{
-    warning("Date not in numeric formats")
-    return(-1)
+    stop("Date not in numeric formats")
+    #return(-1)
   }
   return(entry)
 }
@@ -740,8 +758,8 @@ convertStdDateFormat<-function(entry, index,monthfirst=NULL){
 calculateAgeFromBirthYear<-function(data,columnname,nrcode=NA){
   column.no=getColumnNoForNames(data,columnname)
   if (column.no<0){
-    warning(" Column name for year of birth does not exist")
-    return(-1)
+    stop("Column name for year of birth does not exist")
+    #return(-1)
   }else{
     entry<-data[[column.no]]
     blanks=c(which(entry==""),which(is.na(entry)))
@@ -764,8 +782,8 @@ calculateAgeFromBirthYear<-function(data,columnname,nrcode=NA){
     }
     nonNAages<-calculated.ages[!is.na(calculated.ages)]
     if (any(nonNAages>150 ) || any(nonNAages<0)){
-      warning(" Age can not be negative OR greater than 150")
-      return(-2)
+      stop("Age can not be negative OR greater than 150")
+      #return(-2)
     }else{
       data["calc.age.yob"]<-calculated.ages
       return(data)
@@ -773,7 +791,7 @@ calculateAgeFromBirthYear<-function(data,columnname,nrcode=NA){
   }
 }
 ###########################################################################################################
-#' Function to return the unique contents of the column gien the column name
+#' Function to return the unique contents of the column given the column name
 #' @param data a data frame
 #' @param colname name of column corresponding to year of birth
 #' @return the contents of the column, if success -1 if failure
@@ -790,7 +808,7 @@ getConentdInCols<-function(data, colname){
       return(codes)
     }
   }else{
-    warning("No column exists with the given name")
-    return(-1)
+    stop("No column exists with the given name")
+    #return(-1)
   }
 }

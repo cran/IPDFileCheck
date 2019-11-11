@@ -20,5 +20,5 @@ testAge(data, agecolumn = "age", nrcode = NA)
 Function to check the format of 'age' in data
 }
 \examples{
-testAge(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",999)
+testAge(data.frame("Age"= c(21,15), "Name"= c("John","Dora")),"age",999)
 }

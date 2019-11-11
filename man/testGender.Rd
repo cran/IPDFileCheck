@@ -22,5 +22,5 @@ testGender(data, gendercode, gendercolumn = "gender", nrcode = NA)
 Function to check the format of 'gender' column in data
 }
 \examples{
-testGender(data.frame("sex" = c("m","f"), "Name" = c("John","Dora")),c("f", "m"),"sex",999)
+testGender(data.frame("sex"= c("m","f"), "Name"= c("John","Dora")),c("f", "m"),"sex",999)
 }

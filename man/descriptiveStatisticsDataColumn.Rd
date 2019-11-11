@@ -20,5 +20,5 @@ the descriptive statistics for success , -1 for failure
 Function to return descriptive statistics, sum, no of observations, mean, mode. median, range, standard deviation and standard error
 }
 \examples{
-descriptiveStatisticsDataColumn(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
+descriptiveStatisticsDataColumn(data.frame("age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
 }

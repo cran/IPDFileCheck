@@ -23,68 +23,52 @@ rctdata_error <- data.frame(age=runif(10, -60, 120),
                            arm=c("Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention"),stringsAsFactors = FALSE)
 
 ## ------------------------------------------------------------------------
-  thisdir=getwd()
-  testFileExistenceReadability(thisdir)
-  nodir=paste(thisdir,"test",sep="/")
-  testFileExistenceReadability(nodir)
+  thisfile=system.file("extdata", "blank.txt", package = "IPDFileCheck")
+  testFileExistenceReadability(thisfile)
 
 ## ------------------------------------------------------------------------
 checkColumnExists("sex",rctdata)
-checkColumnExists("gender",rctdata)
 
 ## ------------------------------------------------------------------------
 getColumnNoForNames(rctdata,"sex")
-getColumnNoForNames(rctdata,"gender")
 
 ## ------------------------------------------------------------------------
 testColumnContents(rctdata,"sex",c("M","F"),NA)
 testColumnContents(rctdata,"sex",c("M","F"))
-testColumnContents(rctdata,"sex",c("Male","Female"))
 
 ## ------------------------------------------------------------------------
 testDataColumnNames(c("age","sex","dob","yob","arm"),rctdata)
-testDataColumnNames(c("arm","age","yob","dob","age"),rctdata)
-testDataColumnNames(c("arm","gender","yob","dob","age"),rctdata)
 
 ## ------------------------------------------------------------------------
 testAge(rctdata,"age",NA)
-testAge(rctdata_error,"age",NA)
 
 ## ------------------------------------------------------------------------
 testGender(rctdata,c("M","F"),"sex",NA)
-testGender(rctdata,c("Male","Female"),"sex",NA)
 
 ## ------------------------------------------------------------------------
 testDataNumeric("age",rctdata,NA,0,100)
-testDataNumeric("yob",rctdata,NA,0,100)
 
 ## ------------------------------------------------------------------------
 testDataNumericNorange("age",rctdata,NA)
 testDataNumericNorange("yob",rctdata,NA)
-testDataNumericNorange("arm",rctdata,NA)
 
 ## ------------------------------------------------------------------------
 testDataString(rctdata,"arm",NA)
-testDataString(rctdata,"yob",NA)
 
 ## ------------------------------------------------------------------------
 testDataStringRestriction(rctdata,"arm",NA,c("Intervention","Control"))
 testDataStringRestriction(rctdata,"sex",NA,c("M","F"))
-testDataStringRestriction(rctdata,"sex",NA,c("Male","Female"))
 
 
 ## ------------------------------------------------------------------------
 getColumnNoForPatternInColumnname("ob",colnames(rctdata))
-getColumnNoForPatternInColumnname("gender",rctdata)
 
 
 ## ------------------------------------------------------------------------
 descriptiveStatisticsDataColumn(rctdata, "age")
-descriptiveStatisticsDataColumn(rctdata, "sex")
 
 ## ------------------------------------------------------------------------
 presentMeanSdRemoveNAText(rctdata, "age")
-presentMeanSdRemoveNAText(rctdata, "sex")
 
 ## ------------------------------------------------------------------------
 returnSubgroupOmitNA(rctdata, "sex","F")
@@ -96,7 +80,6 @@ representCategoricalDataText(rctdata, "arm",NA)
 
 ## ------------------------------------------------------------------------
 calculateAgeFromDob(rctdata,"dob","%d/%m/%y",NA)
-calculateAgeFromDob(rctdata_error,  "dob",0,NA)
 
 ## ------------------------------------------------------------------------
 calculateAgeFromBirthYear(rctdata,"yob",NA)

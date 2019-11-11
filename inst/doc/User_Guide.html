@@ -7,12 +7,13 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Sheeja Manchira Krishnan" />
 
-<meta name="date" content="2019-10-15" />
+<meta name="date" content="2019-11-11" />
 
 <title>User Guide</title>
 
@@ -70,7 +71,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -95,7 +96,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">User Guide</h1>
 <h4 class="author">Sheeja Manchira Krishnan</h4>
-<h4 class="date">2019-10-15</h4>
+<h4 class="date">2019-11-11</h4>
 
 
 
@@ -125,156 +126,92 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 <h2>Examples- IPDFileCheck</h2>
 <div id="to-check-the-file-exists-and-readable" class="section level4">
 <h4>1. To check the file exists and readable</h4>
-<p>The function testFileExistenceReadability tests if the user provided file exists and is readable. Returns 0 for success and -1 for failure. Here in the example a directory named “nodir” is generated and tested.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  thisdir=<span class="kw">getwd</span>()
-  <span class="kw">testFileExistenceReadability</span>(thisdir)
-<span class="co">#&gt; [1] 0</span>
-  nodir=<span class="kw">paste</span>(thisdir,<span class="st">&quot;test&quot;</span>,<span class="dt">sep=</span><span class="st">&quot;/&quot;</span>)
-  <span class="kw">testFileExistenceReadability</span>(nodir)
-<span class="co">#&gt; Warning in testFileExistenceReadability(nodir): Invalid directory or file</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<p>The function testFileExistenceReadability tests if the user provided file exists and is readable. Returns 0 for success and errors for failures. Here in the example a directory named “nodir” is generated and tested.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  thisfile=<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;blank.txt&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;IPDFileCheck&quot;</span>)
+  <span class="kw">testFileExistenceReadability</span>(thisfile)
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-check-if-the-column-exists" class="section level4">
 <h4>2. To check if the column exists</h4>
-<p>The function checkColumnExists tests if the column with user specified column name exists in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘sex’ exists but ‘gender’ do not. Thus the function returns 0 when ‘sex’ is used while returns -1 when ‘gender’ is used.</p>
+<p>The function checkColumnExists tests if the column with user specified column name exists in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘sex’ exists but ‘gender’ do not. Thus the function returns 0 when ‘sex’ is used while returns error when ‘gender’ is used.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">checkColumnExists</span>(<span class="st">&quot;sex&quot;</span>,rctdata)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">checkColumnExists</span>(<span class="st">&quot;gender&quot;</span>,rctdata)
-<span class="co">#&gt; Warning in checkColumnExists(&quot;gender&quot;, rctdata): Data does not contain the</span>
-<span class="co">#&gt; column with the specfied column name</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-get-the-column-number-if-the-column-name-is-known" class="section level4">
 <h4>3. To get the column number if the column name is known</h4>
-<p>The function getColumnNoForNames returns the column number of the column with user specified column name in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘sex’ exists and it is the 2nd column but ‘gender’ do not. Thus the function returns column number 2 when ‘sex’ is used while returns -1 when ‘gender’ is used.</p>
+<p>The function getColumnNoForNames returns the column number of the column with user specified column name in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘sex’ exists and it is the 2nd column but ‘gender’ do not. Thus the function returns column number 2 when ‘sex’ is used while returns error when ‘gender’ is used.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getColumnNoForNames</span>(rctdata,<span class="st">&quot;sex&quot;</span>)
-<span class="co">#&gt; [1] 2</span>
-<span class="kw">getColumnNoForNames</span>(rctdata,<span class="st">&quot;gender&quot;</span>)
-<span class="co">#&gt; Warning in getColumnNoForNames(rctdata, &quot;gender&quot;): Column name does not</span>
-<span class="co">#&gt; exist</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<span class="co">#&gt; [1] 2</span></code></pre></div>
 </div>
 <div id="to-test-column-contents-ie-do-they-contain-specific-items-in-a-given-list" class="section level4">
 <h4>4. To test column contents ie do they contain specific items in a given list?</h4>
-<p>The function testColumnContents tests if the column contents are from a list provided by the user. The user can also give an optional code that correspond to the non response in the data. In the simulated data shown above the column ‘sex’ contains ‘M’ and ‘F’ as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else -1 to indicate error.</p>
+<p>The function testColumnContents tests if the column contents are from a list provided by the user. The user can also give an optional code that correspond to the non response in the data. In the simulated data shown above the column ‘sex’ contains ‘M’ and ‘F’ as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else indicates error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testColumnContents</span>(rctdata,<span class="st">&quot;sex&quot;</span>,<span class="kw">c</span>(<span class="st">&quot;M&quot;</span>,<span class="st">&quot;F&quot;</span>),<span class="ot">NA</span>)
 <span class="co">#&gt; [1] 0</span>
 <span class="kw">testColumnContents</span>(rctdata,<span class="st">&quot;sex&quot;</span>,<span class="kw">c</span>(<span class="st">&quot;M&quot;</span>,<span class="st">&quot;F&quot;</span>))
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testColumnContents</span>(rctdata,<span class="st">&quot;sex&quot;</span>,<span class="kw">c</span>(<span class="st">&quot;Male&quot;</span>,<span class="st">&quot;Female&quot;</span>))
-<span class="co">#&gt; Warning in testColumnContents(rctdata, &quot;sex&quot;, c(&quot;Male&quot;, &quot;Female&quot;)): Invalid</span>
-<span class="co">#&gt; entry in column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-test-column-names-of-a-data-being-different-from-what-specified" class="section level4">
 <h4>5. To test column names of a data being different from what specified</h4>
-<p>The function testDataColumnNames tests if the column names in the data are that provided by the user. In the simulated data ‘rctdata’, shown above the column ‘sex’ contains ‘M’ and ‘F’ as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else -1 to indicate error.</p>
+<p>The function testDataColumnNames tests if the column names in the data are that provided by the user. In the simulated data ‘rctdata’, shown above the column ‘sex’ contains ‘M’ and ‘F’ as the entries and we can test this as shown below. If the entries are of the given format the function returns 0 else indicates error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testDataColumnNames</span>(<span class="kw">c</span>(<span class="st">&quot;age&quot;</span>,<span class="st">&quot;sex&quot;</span>,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;yob&quot;</span>,<span class="st">&quot;arm&quot;</span>),rctdata)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testDataColumnNames</span>(<span class="kw">c</span>(<span class="st">&quot;arm&quot;</span>,<span class="st">&quot;age&quot;</span>,<span class="st">&quot;yob&quot;</span>,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;age&quot;</span>),rctdata)
-<span class="co">#&gt; Warning in testDataColumnNames(c(&quot;arm&quot;, &quot;age&quot;, &quot;yob&quot;, &quot;dob&quot;, &quot;age&quot;),</span>
-<span class="co">#&gt; rctdata): One or other column may have different names</span>
-<span class="co">#&gt; [1] -1</span>
-<span class="kw">testDataColumnNames</span>(<span class="kw">c</span>(<span class="st">&quot;arm&quot;</span>,<span class="st">&quot;gender&quot;</span>,<span class="st">&quot;yob&quot;</span>,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;age&quot;</span>),rctdata)
-<span class="co">#&gt; Warning in testDataColumnNames(c(&quot;arm&quot;, &quot;gender&quot;, &quot;yob&quot;, &quot;dob&quot;, &quot;age&quot;), :</span>
-<span class="co">#&gt; One or other column may have different names</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-check-the-format-of-column-age-in-data" class="section level4">
 <h4>6. To check the format of column ‘age’ in data</h4>
-<p>The function testAge tests if the contents of the column ‘age’ is valid. User can provide the name of the column and the optional code of non response. Age should be numeric and with in limits of 0 and 150. In the simulated data ‘rctdata’ the ‘age’ column contents are valid thus returning 0. But with the given dataset ‘rctdata_error’ the age can have negative numbers, such that the function returns -1 to indicate an error .</p>
+<p>The function testAge tests if the contents of the column ‘age’ is valid. User can provide the name of the column and the optional code of non response. Age should be numeric and with in limits of 0 and 150. In the simulated data ‘rctdata’ the ‘age’ column contents are valid thus returning 0. But with the given dataset ‘rctdata_error’ the age can have negative numbers, such that the function returns an error .</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testAge</span>(rctdata,<span class="st">&quot;age&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testAge</span>(rctdata_error,<span class="st">&quot;age&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; Warning in testAge(rctdata_error, &quot;age&quot;, NA): Invalid entry in age column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-check-the-format-of-column-gender-in-data" class="section level4">
 <h4>7. To check the format of column ‘gender’ in data</h4>
-<p>The function testGender tests if the contents of the gender column is valid. User provides the name of the gender column, how it is coded, and the optional code of non response. In the simulated data ‘rctdata’ the gender column name is ‘sex’ and coded as ‘M’ and ‘F’. Thus the function returns 0. but if the user tells that the gender is coded as “Male” and “Female” the function returns error -1.</p>
+<p>The function testGender tests if the contents of the gender column is valid. User provides the name of the gender column, how it is coded, and the optional code of non response. In the simulated data ‘rctdata’ the gender column name is ‘sex’ and coded as ‘M’ and ‘F’. Thus the function returns 0. but if the user tells that the gender is coded as “Male” and “Female” the function returns error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testGender</span>(rctdata,<span class="kw">c</span>(<span class="st">&quot;M&quot;</span>,<span class="st">&quot;F&quot;</span>),<span class="st">&quot;sex&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testGender</span>(rctdata,<span class="kw">c</span>(<span class="st">&quot;Male&quot;</span>,<span class="st">&quot;Female&quot;</span>),<span class="st">&quot;sex&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; Warning in testGender(rctdata, c(&quot;Male&quot;, &quot;Female&quot;), &quot;sex&quot;, NA): Invalid</span>
-<span class="co">#&gt; entry in gender column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
 <div id="to-check-the-format-of-column-contents--numeric-or-string" class="section level4">
 <h4>8. To check the format of column contents -numeric or string</h4>
-<p>The function testDataNumeric tests if the column contents are numeric. User provides the minimum and maximum values the numeric values in the column can have along with an optional code that suggests the non response. If the entries are numeric, format the function returns 0 else -1 to indicate error. In the ‘rctdata’ above,The age is from 0 to 100, hence it returns 0, while the year of birth column “yob” has values greater than 100, hence returning a -1.</p>
+<p>The function testDataNumeric tests if the column contents are numeric. User provides the minimum and maximum values the numeric values in the column can have along with an optional code that suggests the non response. If the entries are numeric, format the function returns 0 else indicates error In the ‘rctdata’ above,The age is from 0 to 100, hence it returns 0, while the year of birth column “yob” has values greater than 100, hence returning an error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testDataNumeric</span>(<span class="st">&quot;age&quot;</span>,rctdata,<span class="ot">NA</span>,<span class="dv">0</span>,<span class="dv">100</span>)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testDataNumeric</span>(<span class="st">&quot;yob&quot;</span>,rctdata,<span class="ot">NA</span>,<span class="dv">0</span>,<span class="dv">100</span>)
-<span class="co">#&gt; Warning in testDataNumeric(&quot;yob&quot;, rctdata, NA, 0, 100): Invalid ranges in</span>
-<span class="co">#&gt; column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
-<p>The function testDataNumericNorange tests if the column contents are numeric (but with no ranges provided). User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column “arm” has no numeric data in ‘rctdata’, the function returns -1 to indicate error.</p>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
+<p>The function testDataNumericNorange tests if the column contents are numeric (but with no ranges provided). User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error As the column “arm” has no numeric data in ‘rctdata’, the function returns error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testDataNumericNorange</span>(<span class="st">&quot;age&quot;</span>,rctdata,<span class="ot">NA</span>)
 <span class="co">#&gt; [1] 0</span>
 <span class="kw">testDataNumericNorange</span>(<span class="st">&quot;yob&quot;</span>,rctdata,<span class="ot">NA</span>)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testDataNumericNorange</span>(<span class="st">&quot;arm&quot;</span>,rctdata,<span class="ot">NA</span>)
-<span class="co">#&gt; Warning in testDataNumericNorange(&quot;arm&quot;, rctdata, NA): Some values-other</span>
-<span class="co">#&gt; than NR code is not numeric</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
-<p>The function testDataString tests if the column contents are string. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column “arm” has no numeric data in ‘rctdata’, the function returns 0 and ‘yob’ with numeric data, -1 to indicate error.</p>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
+<p>The function testDataString tests if the column contents are string. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error As the column “arm” has no numeric data in ‘rctdata’, the function returns 0 and ‘yob’ with numeric data, indicates error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testDataString</span>(rctdata,<span class="st">&quot;arm&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testDataString</span>(rctdata,<span class="st">&quot;yob&quot;</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; Warning in testDataString(rctdata, &quot;yob&quot;, NA): Numeric entry in column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
-<p>The function testDataStringRestriction tests if the column contents are string but with given restrictions. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else -1 to indicate error. As the column “arm” has no numeric data in ‘rctdata’ and they contain the entries as specified, the function returns 0. But the column ‘sex’ contain “M” and “F” other than “Male” and “Female”.</p>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
+<p>The function testDataStringRestriction tests if the column contents are string but with given restrictions. User can provide with an optional code that suggests the non response.If the entries are numeric, format the function returns 0 else indicates error. As the column “arm” has no numeric data in ‘rctdata’ and they contain the entries as specified, the function returns 0. But the column ‘sex’ contain “M” and “F” other than “Male” and “Female”.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">testDataStringRestriction</span>(rctdata,<span class="st">&quot;arm&quot;</span>,<span class="ot">NA</span>,<span class="kw">c</span>(<span class="st">&quot;Intervention&quot;</span>,<span class="st">&quot;Control&quot;</span>))
 <span class="co">#&gt; [1] 0</span>
 <span class="kw">testDataStringRestriction</span>(rctdata,<span class="st">&quot;sex&quot;</span>,<span class="ot">NA</span>,<span class="kw">c</span>(<span class="st">&quot;M&quot;</span>,<span class="st">&quot;F&quot;</span>))
-<span class="co">#&gt; [1] 0</span>
-<span class="kw">testDataStringRestriction</span>(rctdata,<span class="st">&quot;sex&quot;</span>,<span class="ot">NA</span>,<span class="kw">c</span>(<span class="st">&quot;Male&quot;</span>,<span class="st">&quot;Female&quot;</span>))
-<span class="co">#&gt; Warning in testDataStringRestriction(rctdata, &quot;sex&quot;, NA, c(&quot;Male&quot;,</span>
-<span class="co">#&gt; &quot;Female&quot;)): Invalid entry in column</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; [1] 0</span></code></pre></div>
 </div>
-<div id="to-return-the-column-number-if-the-pattern-is-contained-in-the-colnames-of-a-data" class="section level4">
-<h4>9 To return the column number if the pattern is contained in the colnames of a data</h4>
-<p>The function getColumnNoForPatternInColumnname returns the column number of the column with column name that contains user specified pattern in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘dob’ and ‘yob’ contains the pattern ‘ob’ and they are the 4th and 5th columns but ‘gender’ do not exist in the data (to return -1).</p>
+<div id="to-return-column-number-if-the-pattern-is-contained-in-the-column-names-of-data" class="section level4">
+<h4>9 To return column number if the pattern is contained in the column names of data</h4>
+<p>The function getColumnNoForPatternInColumnname returns the column number of the column with column name that contains user specified pattern in the data. For example in the above simulated data set ‘rctdata’, the column with column name ‘dob’ and ‘yob’ contains the pattern ‘ob’ and they are the 4th and 5th columns but ‘gender’ do not exist in the data (to return error).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getColumnNoForPatternInColumnname</span>(<span class="st">&quot;ob&quot;</span>,<span class="kw">colnames</span>(rctdata))
-<span class="co">#&gt; [1] 3 4</span>
-<span class="kw">getColumnNoForPatternInColumnname</span>(<span class="st">&quot;gender&quot;</span>,rctdata)
-<span class="co">#&gt; Warning in getColumnNoForPatternInColumnname(&quot;gender&quot;, rctdata): The</span>
-<span class="co">#&gt; pattern does not form any part of columnnames</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; [1] 3 4</span></code></pre></div>
 </div>
 <div id="to-return-descriptive-statistics-sum-no-of-observations-mean-mode.-median-range-standard-deviation-and-standard-error" class="section level4">
 <h4>10. To return descriptive statistics, sum, no of observations, mean, mode. median, range, standard deviation and standard error</h4>
-<p>The function descriptiveStatisticsDataColumn returns the descriptive statistics of the column with the user specified column name. This includes mean, standard deviation, median, mode, standard error f the mean, minimum and maximum values to the 95% confidence intervals. If the column contents are not numeric or any error in calculating any of the quantities, the function returns -1 to indicate error. For example, the column ‘age’ is numeric and can return the descriptive statistics, but the column ‘sex’ is not. Hence the function returns -1 to indicate error.</p>
+<p>The function descriptiveStatisticsDataColumn returns the descriptive statistics of the column with the user specified column name. This includes mean, standard deviation, median, mode, standard error f the mean, minimum and maximum values to the 95% confidence intervals. If the column contents are not numeric or any error in calculating any of the quantities, the function returns an error. For example, the column ‘age’ is numeric and can return the descriptive statistics, but the column ‘sex’ is not. Hence the function returns an error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">descriptiveStatisticsDataColumn</span>(rctdata, <span class="st">&quot;age&quot;</span>)
 <span class="co">#&gt;          Sum     Mean       SD Median     Mode       SE  Minimum  Maximum</span>
 <span class="co">#&gt; age 635.4561 63.54561 16.54699 61.756 39.69983 5.232617 39.69983 94.33068</span>
 <span class="co">#&gt;     Count       LQ       UQ 95%CI.low 95%CI.high</span>
-<span class="co">#&gt; age    10 55.67713 73.41427  40.58966   90.98421</span>
-<span class="kw">descriptiveStatisticsDataColumn</span>(rctdata, <span class="st">&quot;sex&quot;</span>)
-<span class="co">#&gt; Warning in testDataNumericNorange(column.name, data, nrcode): Some values-</span>
-<span class="co">#&gt; other than NR code is not numeric</span>
-<span class="co">#&gt; Warning in descriptiveStatisticsDataColumn(rctdata, &quot;sex&quot;): Non numeric</span>
-<span class="co">#&gt; columns, cant estimate the descriptive statistics</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<span class="co">#&gt; age    10 55.67713 73.41427  40.58966   90.98421</span></code></pre></div>
 </div>
 <div id="to-present-the-mean-and-sd-of-a-data-set-in-the-form-mean-sd" class="section level4">
 <h4>11. To present the mean and sd of a data set in the form Mean (SD)</h4>
-<p>The function presentMeanSdRemoveNAText returns the mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns -1 to indicate error. For example, the column ‘age’ is numeric and can return the mean and SD, but the column ‘sex’ is not. Hence the function returns -1 to indicate error.</p>
+<p>The function presentMeanSdRemoveNAText returns the mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns an error. For example, the column ‘age’ is numeric and can return the mean and SD, but the column ‘sex’ is not. Hence the function returns an error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">presentMeanSdRemoveNAText</span>(rctdata, <span class="st">&quot;age&quot;</span>)
-<span class="co">#&gt; [1] &quot;63.55 (16.55)&quot;</span>
-<span class="kw">presentMeanSdRemoveNAText</span>(rctdata, <span class="st">&quot;sex&quot;</span>)
-<span class="co">#&gt; Warning in testDataNumericNorange(column.name, data, nrcode): Some values-</span>
-<span class="co">#&gt; other than NR code is not numeric</span>
-<span class="co">#&gt; Warning in descriptiveStatisticsDataColumn(data, column.name, nrcode): Non</span>
-<span class="co">#&gt; numeric columns, cant estimate the descriptive statistics</span>
-<span class="co">#&gt; Warning in presentMeanSdRemoveNAText(rctdata, &quot;sex&quot;): Error or no data to</span>
-<span class="co">#&gt; analyse</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
+<span class="co">#&gt; [1] &quot;63.55 (16.55)&quot;</span></code></pre></div>
 </div>
 <div id="to-return-a-subgroup-when-certain-variable-equals-the-given-value-while-omitting-those-with-na" class="section level4">
 <h4>12. To return a subgroup when certain variable equals the given value while omitting those with NA</h4>
-<p>The function returnSubgroupOmitNA returns the subgroup using the user defined condition while omitting any non response values. mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns -1 to indicate error. For example, the first command below gives all the female in the data, while the second command retrieves all those in control arm.</p>
+<p>The function returnSubgroupOmitNA returns the subgroup using the user defined condition while omitting any non response values. mean and SD in the form mean (SD). If the column contents are not numeric or any error in calculating, the function returns an error. For example, the first command below gives all the female in the data, while the second command retrieves all those in control arm.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">returnSubgroupOmitNA</span>(rctdata, <span class="st">&quot;sex&quot;</span>,<span class="st">&quot;F&quot;</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm</span>
 <span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention</span>
@@ -297,25 +234,19 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 </div>
 <div id="to-calculate-age-from-date-of-birth-and-year-of-birth" class="section level4">
 <h4>14. To calculate age from date of birth and year of birth</h4>
-<p>The function calculateAgeFromDob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘dob’ column has dates in the format “%d/%m/%y”. The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return -1 to indicate error.</p>
+<p>The function calculateAgeFromDob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘dob’ column has dates in the format “%d/%m/%y”. The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return an error.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculateAgeFromDob</span>(rctdata,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;%d/%m/%y&quot;</span>,<span class="ot">NA</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm calc.age.dob</span>
-<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     49.85479</span>
-<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     57.66027</span>
-<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.11507</span>
-<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     50.65753</span>
-<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     58.89013</span>
-<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     49.49589</span>
-<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     22.57808</span>
-<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     31.70685</span>
-<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     29.69589</span>
-<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.05479</span>
-<span class="kw">calculateAgeFromDob</span>(rctdata_error,  <span class="st">&quot;dob&quot;</span>,<span class="dv">0</span>,<span class="ot">NA</span>)
-<span class="co">#&gt; Warning in convertStdDateFormat(entry, index, monthfirst = NULL): Date not</span>
-<span class="co">#&gt; in numeric formats</span>
-<span class="co">#&gt; Warning in calculateAgeFromDob(rctdata_error, &quot;dob&quot;, 0, NA): Date format is</span>
-<span class="co">#&gt; not right- use numeric values for dates separated by - or /</span>
-<span class="co">#&gt; [1] -2</span></code></pre></div>
+<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     49.92877</span>
+<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     57.73425</span>
+<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.18904</span>
+<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     50.73151</span>
+<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     58.96410</span>
+<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     49.56986</span>
+<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     22.65205</span>
+<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     31.78082</span>
+<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     29.76986</span>
+<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.12877</span></code></pre></div>
 <p>The function calculateAgeFromBirthYear returns the age calculated from given year of birth. User may provide the column name containing date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘yob’ column has birth year.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculateAgeFromBirthYear</span>(rctdata,<span class="st">&quot;yob&quot;</span>,<span class="ot">NA</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm calc.age.yob</span>
@@ -332,6 +263,9 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

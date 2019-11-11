@@ -22,5 +22,7 @@ data if success -1 if failure
 Function to calculate age from date of birth
 }
 \examples{
-calculateAgeFromDob(data.frame("dob" = c("1987-05-28","1987-06-18")),"dob","\%y-\%m-\%d")
+library(IPDFileCheck)
+calculateAgeFromDob(data.frame("dob"=c("1987-05-28","1987-06-18","1987-07-09"),
+"num"=c(1,2,3),stringsAsFactors = FALSE),"dob")
 }

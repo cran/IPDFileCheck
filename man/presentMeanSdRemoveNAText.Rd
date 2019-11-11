@@ -20,5 +20,5 @@ the mean(sd), -1 for failure
 Function to present the mean and sd of a data set in the form Mean (SD)
 }
 \examples{
-presentMeanSdRemoveNAText(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
+presentMeanSdRemoveNAText(data.frame("age" = c(21,15), "Name" = c("John","Dora")),"age",NA)
 }

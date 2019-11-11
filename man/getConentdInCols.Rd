@@ -2,7 +2,7 @@
 % Please edit documentation in R/IPDdataFilecheck.R
 \name{getConentdInCols}
 \alias{getConentdInCols}
-\title{Function to return the unique contents of the column gien the column name}
+\title{Function to return the unique contents of the column given the column name}
 \usage{
 getConentdInCols(data, colname)
 }
@@ -15,7 +15,7 @@ getConentdInCols(data, colname)
 the contents of the column, if success -1 if failure
 }
 \description{
-Function to return the unique contents of the column gien the column name
+Function to return the unique contents of the column given the column name
 }
 \examples{
 getConentdInCols(data.frame("yob" = c(1951,1980), "Name" = c("John","Dora")),"yob")
