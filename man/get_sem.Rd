@@ -2,7 +2,8 @@
 % Please edit documentation in R/IPDFilecheck.R
 \name{get_sem}
 \alias{get_sem}
-\title{Function to estimate standard error of the mean}
+\title{###############################################################################
+Function to estimate standard error of the mean}
 \usage{
 get_sem(x)
 }
@@ -13,6 +14,7 @@ get_sem(x)
 SE the standard error of the mean
 }
 \description{
+###############################################################################
 Function to estimate standard error of the mean
 }
 \examples{

@@ -2,7 +2,8 @@
 % Please edit documentation in R/IPDFilecheck.R
 \name{check_colno_pattern_colname}
 \alias{check_colno_pattern_colname}
-\title{Function to return the column number if a given pattern is contained in
+\title{###############################################################################
+Function to return the column number if a given pattern is contained in
 the column names of a data}
 \usage{
 check_colno_pattern_colname(pattern, column_names)
@@ -16,6 +17,7 @@ check_colno_pattern_colname(pattern, column_names)
 TRUE , if success FALSE, if failure
 }
 \description{
+###############################################################################
 Function to return the column number if a given pattern is contained in
 the column names of a data
 }

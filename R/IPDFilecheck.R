@@ -4,32 +4,51 @@
 #' @return 0, if packages cant be installed and loaded, else error
 #' @examples check_load_packages("dplyr")
 #' @export
+#' @importFrom methods is
 check_load_packages <- function(pkg) {
-  new_pkg  <-  pkg[!(pkg %in% installed.packages()[, "Package"])]
-  list_packages <- available.packages(contriburl =
-                   contrib.url(repos = "http://cran.us.r-project.org",
-                   type = getOption("pkgType")))
-  if (length(new_pkg) >= 1) {
-      if (new_pkg %in% list_packages) {
-        suppressWarnings(install.packages(new_pkg,
-                  lib = .libPaths(), repos  =  "http://cran.us.r-project.org",
-                  contriburl  =  contrib.url(repos  =  "http://cran.us.r-project.org",
-                  type <- getOption("pkgType")), available  =  NULL,
-                  destdir  =  NULL, dependencies  =  TRUE, type  <-  getOption("pkgType"),
-                  configure.args  =  getOption("configure.args"),
-                  configure.vars  =  getOption("configure.vars"),
-                  clean  =  FALSE, Ncpus  = getOption("Ncpus", 1L),
-                  verbose  =  getOption("verbose"),
-                  libs_only  =  FALSE))
-        .Library }else{
-        stop("Invalid package")
+  for(i in seq_len(length(pkg))){
+    x <- pkg[i]
+    if (!suppressWarnings(require(x,character.only = TRUE)))
+    {
+      trythis <- tryCatch(install.packages(x,dependencies=TRUE,repos = "http://cran.us.r-project.org"),
+               error=function(e)
+                 cat("Error "),
+               warning=function(e)
+                 cat("Warning "))
+      if(is(trythis,"warning")){
+        stop("Warning installing")
       }
+      if(is(trythis,"error")){
+        stop("Error installing")
+      }
+      trythis <- tryCatch(require(x,character.only = TRUE),
+                          error=function(e)
+                            stop("Error in adding to library "),
+                          warning=function(e)
+                            stop("Invalid package ")
+      )
+    }
   }
-  valid <- pkg[(pkg %in% list_packages)]
-  sapply(valid, require, character.only =  TRUE)
   return(0)
 }
-
+###############################################################################
+#' Function to test column names of a data being different from what specified
+#' @param column_names column names of the data frame
+#' @param data a data frame
+#' @return 0, if success error, if failure
+#' @examples
+#' test_columnnames(c("name","age"), data.frame("Age" =  c(21,15),
+#' "Name" =  c("John","Dora")))
+#' @export
+test_columnnames <- function(column_names, data) {
+  upper_given_colnames <- sort(toupper(column_names))
+  upper_data_colnames <- sort(toupper(colnames(data)))
+  if (sum(upper_given_colnames == upper_data_colnames) == length(column_names)) {
+    return(0)
+  }else{
+    stop("One or more columns may have different names")
+  }
+}
 ###############################################################################
 #' Function to throw error on invalid directory or file and if not readable
 #' @param filename name of a file or dir
@@ -49,21 +68,20 @@ test_file_exist_read <- function(filename) {
   }
 }
 ###############################################################################
-#' Function to test column names of a data being different from what specified
-#' @param column_names column names of the data frame
+#' Function to return the column number for column name
 #' @param data a data frame
-#' @return 0, if success error, if failure
+#' @param column_name column names of the data frame
+#' @return column number, if success error, if failure
 #' @examples
-#' test_columnnames(c("name","age"), data.frame("Age" =  c(21,15),
-#' "Name" =  c("John","Dora")))
+#' get_columnno_fornames(data.frame("Age" =  c(21,15), "Name" =  c("John","Dora")),"Name")
 #' @export
-test_columnnames <- function(column_names, data) {
-  upper_given_colnames <- sort(toupper(column_names))
-  upper_data_colnames <- sort(toupper(colnames(data)))
-  if (sum(upper_given_colnames == upper_data_colnames) == length(column_names)) {
-    return(0)
+get_columnno_fornames <- function(data, column_name) {
+  data_column_names  <-  toupper(colnames(data))
+  if (any(data_column_names == toupper(column_name))) {
+    column_no <- which(data_column_names == toupper(column_name))
+    return(column_no)
   }else{
-    stop("One or other column may have different names")
+    stop("Column name does not exist")
   }
 }
 ###############################################################################
@@ -83,36 +101,19 @@ test_age <- function(data, agecolumn = "age", nrcode = NA) {
   }else{
     entry  <- data[[column_no]]
     blanks <- c(which(entry == ""), which(is.na(entry)))
-    if (length(blanks)  !=  0) {
+    if (length(blanks) !=  0) {
       entry[blanks] <- nrcode
     }
     if (is.na(nrcode)) {
       newentry <- as.numeric(entry[which(!is.na(entry))])
     }else{
-      newentry <- as.numeric(entry[which(entry  !=  nrcode)])
+      newentry <- as.numeric(entry[which(entry !=  nrcode)])
     }
     if (any(newentry > 150) || any(newentry < 0)) {
       stop("Invalid entry in age column")
      }else{
       return(0)
     }
-  }
-}
-###############################################################################
-#' Function to return the column number for column name
-#' @param data a data frame
-#' @param column_name column names of the data frame
-#' @return column number, if success error, if failure
-#' @examples
-#' get_columnno_fornames(data.frame("Age" =  c(21,15), "Name" =  c("John","Dora")),"Name")
-#' @export
-get_columnno_fornames <- function(data, column_name) {
-  data_column_names  <-  toupper(colnames(data))
-  if (any(data_column_names == toupper(column_name))) {
-    column_no <- which(data_column_names == toupper(column_name))
-    return(column_no)
-  }else{
-    stop("Column name does not exist")
   }
 }
 ###############################################################################
@@ -137,8 +138,8 @@ test_gender <- function(data, gendercode, gendercolumn = "gender", nrcode = NA) 
       newentry <- entry[!is.na(entry)]
       gendercode <- gendercode[!is.na(gendercode)]
     }else{
-      newentry <- entry[entry  !=  nrcode, ]
-      gendercode <- gendercode[which(gendercode  !=  nrcode)]
+      newentry <- entry[entry != nrcode, ]
+      gendercode <- gendercode[which(gendercode !=  nrcode)]
     }
     facs <- levels(factor(toupper(newentry)))
     if (all(facs %in% gendercode)) {
@@ -169,8 +170,8 @@ test_column_contents <- function(data, column, code, nrcode = NA) {
       newentry <- entry[!is.na(entry)]
       code <- code[!is.na(code)]
     }else{
-      newentry <- entry[entry  !=  nrcode, ]
-      code <- code[which(code  !=  nrcode)]
+      newentry <- entry[entry !=  nrcode, ]
+      code <- code[which(code !=  nrcode)]
     }
     facs <- levels(factor(newentry))
     if (all(facs %in% code)) {
@@ -202,7 +203,7 @@ test_data_numeric <- function(column_name, data, nrcode = NA, minval, maxval) {
     if (is.na(nrcode)) {
       new_entry  <-  (entry[which(!is.na(entry))])
     }else{
-      new_entry  <-  (entry[which(entry  !=  nrcode)])
+      new_entry  <-  (entry[which(entry != nrcode)])
     }
     if (is.numeric(new_entry)) {
       if (any(new_entry < minval) || any(new_entry > maxval)) {
@@ -243,6 +244,36 @@ test_data_numeric_norange <- function(column_name, data, nrcode = NA) {
     }else{
       stop("Some values-other than NR code is not numeric")
 
+    }
+  }
+}
+###############################################################################
+#' Function to check the format of a string column
+#' @param data data frame
+#' @param column_name the column name
+#' @param nrcode non response code corresponding to the column
+#' @return 0, if success error, if failure
+#' @examples
+#' test_data_string(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"name",-999)
+#' @export
+test_data_string <- function(data, column_name, nrcode = NA) {
+  column_no <- get_columnno_fornames(data, column_name)
+  if (column_no < 0) {
+    stop("Column name does not exist")
+  }else{
+    temp <- data[column_no]
+    temp <- unlist(temp[!is.na(temp)])
+    if (!is.na(nrcode)) {
+      new_entry <- temp[temp != nrcode]
+    }else{
+      new_entry <- temp[!is.na(temp)]
+    }
+    new_entry <- suppressWarnings(as.numeric(as.character(new_entry)))
+    if (any(!is.na(new_entry))) {
+      stop("Numeric entry in column")
+
+    }else{
+      return(0)
     }
   }
 }
@@ -293,53 +324,7 @@ test_data_string_restriction <- function(data, column_name, nrcode = NA, allowed
 
   }
 }
-###############################################################################
-#' Function to check the format of a string column
-#' @param data data frame
-#' @param column_name the column name
-#' @param nrcode non response code corresponding to the column
-#' @return 0, if success error, if failure
-#' @examples
-#' test_data_string(data.frame("Age" = c(21,15), "Name" = c("John","Dora")),"name",-999)
-#' @export
-test_data_string <- function(data, column_name, nrcode = NA) {
-  column_no <- get_columnno_fornames(data, column_name)
-  if (column_no < 0) {
-    stop("Column name does not exist")
-  }else{
-    temp <- data[column_no]
-    temp <- unlist(temp[!is.na(temp)])
-    if (!is.na(nrcode)) {
-      new_entry <- temp[temp != nrcode]
-    }else{
-      new_entry <- temp[!is.na(temp)]
-    }
-    new_entry <- suppressWarnings(as.numeric(as.character(new_entry)))
-    if (any(!is.na(new_entry))) {
-      stop("Numeric entry in column")
-
-    }else{
-      return(0)
-    }
-  }
-}
-###############################################################################
-#' Function to return the column number if a given pattern is contained
-#' in the column names of a data
-#' @param pattern a string that needs to be checked
-#' @param column_names column names actually have
-#' @return column number, if success error, if failure
-#' @examples get_colno_pattern_colname("age","female_age")
-#' @export
-get_colno_pattern_colname <- function(pattern, column_names) {
-  if (check_colno_pattern_colname(pattern, column_names) == TRUE) {
-    test <- grep(toupper(pattern), toupper(column_names))
-    return(test)
-  }else{
-    stop("The pattern does not form any part of columnnames")
-  }
-}
-###############################################################################
+#' ###############################################################################
 #' Function to return the column number if a given pattern is contained in
 #' the column names of a data
 #' @param pattern a string that needs to be checked
@@ -361,6 +346,37 @@ check_colno_pattern_colname <- function(pattern, column_names) {
     }else{
       return(TRUE)
     }
+  }
+}
+###############################################################################
+#' Function to return the column number if a given pattern is contained
+#' in the column names of a data
+#' @param pattern a string that needs to be checked
+#' @param column_names column names actually have
+#' @return column number, if success error, if failure
+#' @examples get_colno_pattern_colname("age","female_age")
+#' @export
+get_colno_pattern_colname <- function(pattern, column_names) {
+  if (check_colno_pattern_colname(pattern, column_names) == TRUE) {
+    test <- grep(toupper(pattern), toupper(column_names))
+    return(test)
+  }else{
+    stop("The pattern does not form any part of columnnames")
+  }
+}
+#' ###############################################################################
+#' Function to return mode
+#' @param v a vector
+#' @return mode
+#' @examples get_mode_from_vector(c(1,1,2,3))
+#' @export
+get_mode_from_vector  <-  function(v) {
+  if (is.numeric(v)) {
+    uniqv  <-  unique(v)
+    uniqv[which.max(tabulate(match(v, uniqv)))]
+  }else{
+    stop("Non numeric data")
+
   }
 }
 ###############################################################################
@@ -415,21 +431,6 @@ descriptive_stats_col <- function(data, column_name, nrcode = NA) {
   }
 }
 ###############################################################################
-#' Function to return mode
-#' @param v a vector
-#' @return mode
-#' @examples get_mode_from_vector(c(1,1,2,3))
-#' @export
-get_mode_from_vector  <-  function(v) {
-  if (is.numeric(v)) {
-    uniqv  <-  unique(v)
-    uniqv[which.max(tabulate(match(v, uniqv)))]
-  }else{
-    stop("Non numeric data")
-
-  }
-}
-###############################################################################
 #' Function to check the given column exists
 #' @param column_name a column name
 #' @param data data frame
@@ -444,7 +445,7 @@ check_column_exists <- function(column_name, data) {
     stop("Data does not contain the column with the specfied column name")
   }
 }
-###############################################################################
+#' ###############################################################################
 #' Function to present the mean and sd of a data set in the form Mean (SD)
 #' @param data data frame
 #' @param column_name the column name
@@ -510,10 +511,9 @@ cohensd <-  function(x, y) {
     return(ans)
   }else{
     stop("Vector contains atleast one NA or string")
-
   }
 }
-###############################################################################
+#' ###############################################################################
 #' Function to estimate standard error of the mean
 #' @param x, a vector
 #' @return SE the standard error of the mean
@@ -596,6 +596,85 @@ represent_categorical_textdata <- function(data, variable, nrcode) {
     return(ans)
 }
 ###############################################################################
+#' Helper function to keep date formats in year/month/date
+#' @param entry a data frame or a  vector
+#' @param index those correspond to valid date (omitting non response code or no entry)
+#' @param monthfirst if month is given before date, NULL by default
+#' @return entry corrected entries
+#' @examples convert_stddate_format(c("01/01/2000","02/02/2002"),c(1,2),NULL)
+#' @export
+convert_stddate_format <- function(entry, index, monthfirst = NULL) {
+  contents <- unlist(strsplit(entry[1], ""))
+  first <- which(!grepl("^[0-9]", contents))[1]
+  ch <- contents[first]
+  one <- two <- three <- c(0)
+  for (i in seq_len(length(index))) {
+    one <- c(one, unlist(strsplit(entry[index[i]], ch))[1])
+    two <- c(two, unlist(strsplit(entry[index[i]], ch))[2])
+    three <- c(three, unlist(strsplit(entry[index[i]], ch))[3])
+  }
+  one <- (one[-1])
+  two <- (two[-1])
+  three <- (three[-1])
+  test1 <- sum(is.na(suppressWarnings(as.numeric(one)))) == length(one)
+  test2 <- sum(is.na(suppressWarnings(as.numeric(two)))) == length(two)
+  test3 <- sum(is.na(suppressWarnings(as.numeric(three)))) == length(three)
+  check <- test1 || test2 || test3
+  if (check == FALSE) {
+    one <- as.numeric(one)
+    two <- as.numeric(two)
+    three <- as.numeric(three)
+    if (min(one) >= 1000) {
+      if (is.null(monthfirst)) {
+        if (max(two) <= 12 || max(three) > 12) {
+          for (i in seq_len(length(index)))
+            entry[index[i]] <- paste(one[i], "/", two[i], "/", three[i], sep = "")
+        }else{
+          for (i in seq_len(length(index)))
+            entry[index[i]] <- paste(one[i], "/", three[i], "/", two[i], sep = "")
+        }
+      }else{
+        if (monthfirst == FALSE) {
+          for (i in seq_len(length(index)))
+            entry[index[i]] <- paste(one[i], "/", three[i], "/", two[i], sep = "")
+        }else{
+          for (i in seq_len(length(index)))
+            entry[index[i]] <- paste(one[i], "/", two[i], "/", three[i], sep = "")
+        }
+      }
+    }else{
+      if (min(three) >= 1000) {
+        if (is.null(monthfirst)) {
+          if (max(two) <= 12 || max(one) > 12) {
+            for (i in seq_len(length(index))) {
+              entry[index[i]] <- paste(three[i], "/", two[i], "/", one[i], sep = "")
+            }
+          }else{
+            for (i in seq_len(length(index))) {
+              entry[index[i]] <- paste(three[i], "/", one[i], "/", two[i], sep = "")
+            }
+          }
+        }else{
+          if (monthfirst == FALSE) {
+            for (i in seq_len(length(index))) {
+              entry[index[i]] <- paste(three[i], "/", two[i], "/", one[i], sep = "")
+            }
+          }else{
+            for (i in seq_len(length(index))) {
+              entry[index[i]] <- paste(three[i], "/", one[i], "/", two[i], sep = "")
+            }
+          }
+        }
+      }else{
+        stop("Error-no year shown in date")
+      }
+    }
+  }else{
+    stop("Date not in numeric formats")
+  }
+  return(entry)
+}
+###############################################################################
 #' Function to calculate age from date of birth
 #' @param data a data frame
 #' @param columnname name of column corresponding to date of birth
@@ -657,92 +736,7 @@ calculate_age_from_dob <- function(data, columnname, dateformat = FALSE, nrcode 
     }
   }
 }
-###############################################################################
-#' Helper function to keep date formats in year/month/date
-#' @param entry a data frame or a  vector
-#' @param index those correspond to valid date (omitting non response code or no entry)
-#' @param monthfirst if month is given before date, NULL by default
-#' @return entry corrected entries
-#' @examples convert_stddate_format(c("01/01/2000","02/02/2002"),c(1,2),NULL)
-#' @export
-convert_stddate_format <- function(entry, index, monthfirst = NULL) {
-  contents <- unlist(strsplit(entry[1], ""))
-  ## Get the location of non numeric separator?
-  first <- which(!grepl("^[0-9]", contents))[1]
-  ch <- contents[first]
-  one <- two <- three <- c(0)
-  for (i in seq_len(length(index))) {
-    one <- c(one, unlist(strsplit(entry[index[i]], ch))[1])
-    two <- c(two, unlist(strsplit(entry[index[i]], ch))[2])
-    three <- c(three, unlist(strsplit(entry[index[i]], ch))[3])
-  }
-  one <- (one[-1])
-  two <- (two[-1])
-  three <- (three[-1])
-  test1 <- sum(is.na(suppressWarnings(as.numeric(one)))) == length(one)
-  test2 <- sum(is.na(suppressWarnings(as.numeric(two)))) == length(two)
-  test3 <- sum(is.na(suppressWarnings(as.numeric(three)))) == length(three)
-  check <- test1 || test2 || test3
-  if (check == FALSE) {
-    one <- as.numeric(one)
-    two <- as.numeric(two)
-    three <- as.numeric(three)
-    if (min(one) >= 1000) {
-      if (is.null(monthfirst)) {
-        if (max(two) <= 12 || max(three) > 12) {
-          for (i in seq_len(length(index)))
-            entry[index[i]] <- paste(one[i], "/", two[i], "/", three[i], sep = "")
 
-        }else{
-          for (i in seq_len(length(index)))
-            entry[index[i]] <- paste(one[i], "/", three[i], "/", two[i], sep = "")
-        }
-      }else{
-        if (monthfirst == FALSE) {
-          for (i in seq_len(length(index)))
-            entry[index[i]] <- paste(one[i], "/", three[i], "/", two[i], sep = "")
-        }else{
-          for (i in seq_len(length(index)))
-            entry[index[i]] <- paste(one[i], "/", two[i], "/", three[i], sep = "")
-
-        }
-      }
-    }else{
-      if (min(three) >= 1000) {
-        if (is.null(monthfirst)) {
-          if (max(two) <= 12 || max(one) > 12) {
-            for (i in seq_len(length(index))) {
-              entry[index[i]] <- paste(three[i], "/", two[i], "/", one[i], sep = "")
-            }
-          }else{
-            for (i in seq_len(length(index))) {
-              entry[index[i]] <- paste(three[i], "/", one[i], "/", two[i], sep = "")
-            }
-          }
-        }else{
-          if (monthfirst == FALSE) {
-            for (i in seq_len(length(index))) {
-              entry[index[i]] <- paste(three[i], "/", two[i], "/", one[i], sep = "")
-            }
-          }else{
-            for (i in seq_len(length(index))) {
-              entry[index[i]] <- paste(three[i], "/", one[i], "/", two[i], sep = "")
-            }
-          }
-
-        }
-
-      }else{
-        stop("Error-no year shown in date")
-
-      }
-    }
-  }else{
-    stop("Date not in numeric formats")
-
-  }
-  return(entry)
-}
 ###############################################################################
 #' Function to calculate age from year of birth
 #' @param data a data frame
@@ -772,10 +766,9 @@ calculate_age_from_year <- function(data, columnname, nrcode = NA) {
       calculated_ages[index] <- this_year - as.numeric(as.character(entry[index]))
       calculated_ages[blanks] <- NA
     }else{
-      index  <-  which(entry !=  nrcode)
+      index <- which(entry !=  nrcode)
       calculated_ages[index] <- this_year - as.numeric(as.character(entry[index]))
       calculated_ages[blanks] <- NA
-
     }
     non_na_ages <- calculated_ages[!is.na(calculated_ages)]
     if (any(non_na_ages > 150) || any(non_na_ages < 0)) {

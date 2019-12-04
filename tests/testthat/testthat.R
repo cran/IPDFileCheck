@@ -5,8 +5,10 @@ test_that("testing package installation",  {
   expect_identical(check_load_packages("config"),  0)
   expect_identical(check_load_packages("valueEQ5D"),  0)
   expect_error(check_load_packages("Sheeja"),  "Invalid package",  fixed = TRUE)
+  reqd_packages = c("gmodels", "lmtest", "survival", "eha", "nlme", "coda", "lattice", "R2WinBUGS", "MASS", "foreign", "plyr")
+  expect_identical(check_load_packages(reqd_packages),  0)
 })
-###############################################################################
+##############################################################################
 context("testing file existence")
 test_that("test for file existence and access",  {
   thisfile <- system.file("extdata",  "blank.txt",
@@ -26,7 +28,7 @@ test_that("testing column names of a data",  {
   expect_identical(test_columnnames(c("num", "name"), tempdata), 0)
   colnames(tempdata) <- c("num", "sex")
   expect_error(test_columnnames(c("num", "name"), tempdata),
-               "One or other column may have different names", fixed = TRUE)
+               "One or more columns may have different names", fixed = TRUE)
 })
  # #########################################################################
 context("testing age calculated from year of birth")
