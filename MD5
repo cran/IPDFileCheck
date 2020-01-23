@@ -1,12 +1,12 @@
-66b4e03fa1221164a6b7fd6027720264 *DESCRIPTION
+49b8aef26a1f0273f344b83fcae61230 *DESCRIPTION
 75596b3466b8881603e8ae119a985e68 *NAMESPACE
-1e9c0bcc78014444bf6e180334e3155e *R/IPDFilecheck.R
+6823798e3cd00df34628b7d7a2dad296 *R/IPDFilecheck.R
 03b4e23d0d27cfe412f33834511f95d7 *R/globals.R
 1ab73421a75acc545088945d8714de66 *README.md
 3b2b116698dfd098fce93cb246bd6339 *build/vignette.rds
 9bc7ab1c7607bfe21ea94de676164b07 *inst/doc/User_Guide.R
 eac19ea45fd150a4795d214a292bbe4c *inst/doc/User_Guide.Rmd
-e15e8cd35226a0ae16c7d27014276ec4 *inst/doc/User_Guide.html
+352bdeb593b3ee3f76d24955097ffdc6 *inst/doc/User_Guide.html
 d41d8cd98f00b204e9800998ecf8427e *inst/extdata/blank.txt
 97ced8af9485a6c014e09a29af20a426 *man/calculate_age_from_dob.Rd
 34e50f8a3acb5a3f112d1741b5abf33f *man/calculate_age_from_year.Rd
@@ -34,6 +34,6 @@ b669deb444b4e8681d771cfbe98296f9 *man/return_subgroup_omitna.Rd
 5a723e1f2a085e08cd67a0d04943efa3 *man/test_data_string_restriction.Rd
 071d1106480e7d902bc3bf9175694181 *man/test_file_exist_read.Rd
 fe9854d7e399adf95648c7ec74432db4 *man/test_gender.Rd
-6d8a99f30576ab748912d4b730eabd1c *tests/testthat/testthat.R
+0eef45004c0573e7596465842dc41931 *tests/testthat/testthat.R
 eac19ea45fd150a4795d214a292bbe4c *vignettes/User_Guide.Rmd
 607d07f72740b12d031bca87a68503cb *vignettes/_gitignore

@@ -64,25 +64,26 @@ context("testing age")
 test_that("test for age checks for valid age",  {
   x  <-  c(0, 11, NA, 120)
   y  <-  c(1, 2, 3, 4)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
   colnames(tempdata) <- c("name", "age")
   expect_identical(test_age(tempdata), 0)
+
   x  <-  c(0, 11, 78, 160)
   y  <-  c(1, 2, 3, 4)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
   colnames(tempdata) <- c("name", "age")
   expect_error((test_age(tempdata, "age", "")),
                "Invalid entry in age column", fixed = TRUE)
   x  <-  c(0, 11, 78, 160)
   y  <-  c(1, 2, 3, 4)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
   colnames(tempdata) <- c("name", "AGE")
   expect_error((test_age(tempdata, "AGE")),
                "Invalid entry in age column", fixed = TRUE)
   # #
   x  <-  c(-8,  99, 2, 5, -99)
   y  <-  c(1, 2, 3, 4, 5)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
   colnames(tempdata) <- c("name", "age")
   expect_error((test_age(tempdata, "age", -99)),
                "Invalid entry in age column", fixed = TRUE)
@@ -92,16 +93,23 @@ test_that("test for age checks for valid age",  {
   #
   x  <-  c(0, 11.5, "", 120,  "noresponse")
   y  <-  c(1, 2, 3, 4, 5)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x), stringsAsFactors = F)
   colnames(tempdata) <- c("name", "AGE")
   expect_identical(test_age(tempdata, "AGE", "noresponse"), 0)
   #
   x  <-  c(0, 11.5, "", 120,  "noresponse")
   y  <-  c(1, 2, 3, 4, 5)
-  tempdata <-  as.data.frame(cbind(y, x))
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
   colnames(tempdata) <- c("name", "age")
   expect_error((test_age(tempdata, "years", "noresponse")),
                "Column name does not exist", fixed = TRUE)
+
+  x  <-  c(0, 11.5, "sh", 120,  "noresponse")
+  y  <-  c(1, 2, 3, 4, 5)
+  tempdata <-  as.data.frame(cbind(y, x),stringsAsFactors = F)
+  colnames(tempdata) <- c("name", "age")
+  expect_error((test_age(tempdata, "age", "noresponse")),
+               "Error - some entries other then nrcode is not numeric", fixed = TRUE)
 })
 
 ###############################################################################
@@ -470,7 +478,9 @@ test_that("testing representing categorical data",  {
   y2  <-  c(1, 2, 3, 4)
   tempdata <-  as.data.frame(cbind(y2, y1, x))
   colnames(tempdata) <- c("num", "gender", "mark")
-  ans <- c(2, 50, 2, 50)
+  ans <- matrix(c(2, 50, 2, 50), ncol = 2)
+  colnames(ans) <- c("F","M")
+  rownames(ans) <- c("Number", "Percentage")
   expect_equal(represent_categorical_data(tempdata, "gender", NA), ans)
   colnames(tempdata) <- c("num", "a", "mark")
   expect_error(represent_categorical_data(tempdata, "gender", NA),

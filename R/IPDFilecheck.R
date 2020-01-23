@@ -96,7 +96,7 @@ get_columnno_fornames <- function(data, column_name) {
 #' @export
 test_age <- function(data, agecolumn = "age", nrcode = NA) {
   column_no <- get_columnno_fornames(data, agecolumn)
-  if (column_no < 0) {
+   if (column_no < 0) {
     stop("Column name age does not exist")
   }else{
     entry  <- data[[column_no]]
@@ -104,10 +104,20 @@ test_age <- function(data, agecolumn = "age", nrcode = NA) {
     if (length(blanks) !=  0) {
       entry[blanks] <- nrcode
     }
-    if (is.na(nrcode)) {
-      newentry <- as.numeric(entry[which(!is.na(entry))])
+   if (is.na(nrcode)) {
+     this_entry <- entry[!is.na(entry)]
+     this_entry_num <- suppressWarnings(as.numeric(this_entry))
+     if(sum(is.na(this_entry_num)) == 0)
+          newentry <- as.numeric(this_entry)
+      else
+        stop("Error - some entries other then nrcode is not numeric")
     }else{
-      newentry <- as.numeric(entry[which(entry !=  nrcode)])
+      this_entry <- entry[entry !=  nrcode]
+      this_entry_num <- suppressWarnings(as.numeric(this_entry))
+      if(sum(is.na(this_entry_num)) == 0)
+        newentry <- as.numeric(this_entry)
+      else
+        stop("Error - some entries other then nrcode is not numeric")
     }
     if (any(newentry > 150) || any(newentry < 0)) {
       stop("Invalid entry in age column")
@@ -547,9 +557,11 @@ represent_categorical_data <- function(data, variable, nrcode = NA) {
   }else{
     coding <- coding[coding !=  nrcode]
   }
+  coding <- sort(coding)
   num_categories <- length(coding)
   if (check_column_exists(variable, data) == 0) {
     ans  <-  rep(0, 2 * num_categories)
+    all_names <- list()
     for (i in 1:num_categories) {
       if (coding[i] == "NA") {
         num <- nrow(data[which(is.na(data[variable])), ])
@@ -564,8 +576,13 @@ represent_categorical_data <- function(data, variable, nrcode = NA) {
       perc <- 100 * num / nrow(data)
       ans[2 * i] <- round(perc, 2)
       ans[2 * i - 1] <- round(num, 2)
+      names_here <- c(paste(coding[i]))
+      all_names <- c(all_names,names_here)
     }
-    return(ans)
+    mat_ans <- matrix(ans, ncol = length(coding))
+    colnames(mat_ans)  <- all_names
+    rownames(mat_ans) <- c("Number", "Percentage")
+    return(mat_ans)
   }else{
     stop("No column exists")
   }
@@ -583,16 +600,17 @@ represent_categorical_data <- function(data, variable, nrcode = NA) {
 #' @export
 represent_categorical_textdata <- function(data, variable, nrcode) {
     intresult <- represent_categorical_data(data, variable, nrcode)
-    ans  <-  c(0)
+    ans  <-  rep(0, ncol(intresult))
     i <- 1
-    while (i < length(intresult)) {
-      num <- intresult[i]
-      perc <- intresult[i + 1]
+    while (i <= ncol(intresult)) {
+      print(i)
+      num <- intresult[1,i]
+      perc <- intresult[2,i]
       temp <- c(paste(round(num, 2), " (", round(perc, 2), ")", sep = ""))
-      ans <- cbind(ans, temp)
-      i <- i + 2
+      ans[i] <- temp
+      i <- i + 1
     }
-    ans <- ans[-1]
+    names(ans) <- colnames(intresult)
     return(ans)
 }
 ###############################################################################
