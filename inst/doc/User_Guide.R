@@ -79,7 +79,7 @@ represent_categorical_textdata(rctdata, "sex",NA)
 represent_categorical_textdata(rctdata, "arm",NA)
 
 ## ------------------------------------------------------------------------
-calculate_age_from_dob(rctdata,"dob","%d/%m/%y",NA)
+calculate_age_from_dob(rctdata,"dob","dmy")
 
 ## ------------------------------------------------------------------------
 calculate_age_from_year(rctdata,"yob",NA)

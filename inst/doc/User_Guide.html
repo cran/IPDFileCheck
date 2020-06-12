@@ -7,13 +7,12 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Sheeja Manchira Krishnan" />
 
-<meta name="date" content="2020-01-23" />
+<meta name="date" content="2020-06-11" />
 
 <title>User Guide</title>
 
@@ -71,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -96,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">User Guide</h1>
 <h4 class="author">Sheeja Manchira Krishnan</h4>
-<h4 class="date">2020-01-23</h4>
+<h4 class="date">2020-06-11</h4>
 
 
 
@@ -241,18 +240,18 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 <div id="to-calculate-age-from-date-of-birth-and-year-of-birth" class="section level4">
 <h4>14. To calculate age from date of birth and year of birth</h4>
 <p>The function calculate_age_from_dob returns the age calculated from given date of birth. User may provide the column name containing date of birth, format of date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘dob’ column has dates in the format “%d/%m/%y”. The allowed formats for the dates should be in numeric. For example, in the rctdata_error, the dates are in combined numeric and text format, which will return an error.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculate_age_from_dob</span>(rctdata,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;%d/%m/%y&quot;</span>,<span class="ot">NA</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculate_age_from_dob</span>(rctdata,<span class="st">&quot;dob&quot;</span>,<span class="st">&quot;dmy&quot;</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm calc_age_dob</span>
-<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     50.12860</span>
-<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     57.93408</span>
-<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.38888</span>
-<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     50.93134</span>
-<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     59.16393</span>
-<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     49.76970</span>
-<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     22.85189</span>
-<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     31.98087</span>
-<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     29.96970</span>
-<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.32860</span></code></pre></div>
+<span class="co">#&gt; 1  39.69983   M 1992 07/12/1969      Control     50.50838</span>
+<span class="co">#&gt; 2  58.40727   F 1973 16/02/1962 Intervention     58.31421</span>
+<span class="co">#&gt; 3  55.34026   M 1982 03/09/1978      Control     41.76866</span>
+<span class="co">#&gt; 4  43.65464   F 1987 17/02/1969 Intervention     51.31148</span>
+<span class="co">#&gt; 5  75.44182   M 1994 25/11/1960      Control     59.54372</span>
+<span class="co">#&gt; 6  56.68776   F 1936 17/04/1970 Intervention     50.15027</span>
+<span class="co">#&gt; 7  79.45749   M 1970 18/03/1997      Control     23.23224</span>
+<span class="co">#&gt; 8  94.33068   F 1970 30/01/1988 Intervention     32.36066</span>
+<span class="co">#&gt; 9  65.10474   F 1997 03/02/1990      Control     30.34973</span>
+<span class="co">#&gt; 10 67.33162   F 1945 25/09/1978 Intervention     41.70838</span></code></pre></div>
 <p>The function calculate_age_from_year returns the age calculated from given year of birth. User may provide the column name containing date of birth and optional non response code.For example, in the ‘rctdata’ shown above, the ‘yob’ column has birth year.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calculate_age_from_year</span>(rctdata,<span class="st">&quot;yob&quot;</span>,<span class="ot">NA</span>)
 <span class="co">#&gt;         age sex  yob        dob          arm calc.age.yob</span>
@@ -269,9 +268,6 @@ rctdata_error &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<
 </div>
 </div>
 
-
-
-<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
