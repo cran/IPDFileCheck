@@ -71,7 +71,6 @@ test_that("testing age calculated from year of birth", {
     fixed = TRUE
   )
 })
-
 # ############################################################################
 context("testing age")
 test_that("test for age checks for valid age", {
@@ -98,7 +97,7 @@ test_that("test for age checks for valid age", {
   tempdata <- as.data.frame(cbind(y, x), stringsAsFactors = F)
   colnames(tempdata) <- c("name", "AGE")
   expect_identical(test_age(tempdata, "AGE"), -1)
-  # #
+
   x <- c(-8, 99, 2, 5, -99)
   y <- c(1, 2, 3, 4, 5)
   tempdata <- as.data.frame(cbind(y, x), stringsAsFactors = F)
@@ -110,13 +109,13 @@ test_that("test for age checks for valid age", {
     "Column name does not exist",
     fixed = TRUE
   )
-  #
+
   x <- c(0, 11.5, "", 120, "noresponse")
   y <- c(1, 2, 3, 4, 5)
   tempdata <- as.data.frame(cbind(y, x), stringsAsFactors = F)
   colnames(tempdata) <- c("name", "AGE")
   expect_identical(test_age(tempdata, "AGE", "noresponse"), 0)
-  #
+
   x <- c(0, 11.5, "", 120, "noresponse")
   y <- c(1, 2, 3, 4, 5)
   tempdata <- as.data.frame(cbind(y, x), stringsAsFactors = F)
@@ -132,7 +131,6 @@ test_that("test for age checks for valid age", {
   colnames(tempdata) <- c("name", "age")
   expect_identical(test_age(tempdata, "age", "noresponse"), -4)
 })
-
 ###############################################################################
 context("testing gender")
 test_that("test for gender checks for correct gender", {
@@ -140,7 +138,7 @@ test_that("test for gender checks for correct gender", {
   y <- c(1, 2, 3, 4)
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "sex")
-  # warning binrcpp version) appeared and suppressing it
+  # warning binrcpp version appeared and suppressing it
   expect_identical((test_gender(tempdata, c("f", "m"), "sex")), 0)
   x <- c("f", "f", "f", "f", 99)
   y <- c(1, 2, 3, 4, 5)
@@ -155,8 +153,7 @@ test_that("test for gender checks for correct gender", {
   colnames(tempdata) <- c("name", "age")
   expect_error(test_gender(tempdata, c("f", "m", 99), "sex", 99),
     "Column name does not exist",
-    fixed = TRUE
-  )
+    fixed = TRUE)
   colnames(tempdata) <- c("name", "sex")
   expect_identical(test_gender(tempdata, c(1, 2), "sex", 99), -1)
 
@@ -172,8 +169,39 @@ test_that("test for gender checks for correct gender", {
   colnames(tempdata) <- c("name", "gender")
   expect_identical(test_gender(
     tempdata, c("female", "male", 99),
-    "gender", 99
-  ), 0)
+    "gender", 99), 0)
+})
+# ############################################################################
+context("testing get value from codes")
+test_that("test  get value from codes", {
+  data <- data.frame("sex" = c(1, 2, 2, 1, 1),
+   "Name" = c("John", "Dora", "Dora", "John", "John"))
+  list_codes_values <- list(c(1, 2), c("F", "M"))
+  ans <- get_value_from_codes(data, column = "sex", nrcode = NA,
+  list_codes_values)
+  expect_equal(ans, c("F", "M", "M", "F", "F"))
+  expect_error(get_value_from_codes(data, column = NULL, nrcode = NA,
+                       list_codes_values))
+  expect_error(get_value_from_codes(data, column = NA, nrcode = NA,
+                                    list_codes_values))
+  expect_error(get_value_from_codes(data, column = "sex", nrcode = NA,
+                                    list_codes_values = NULL))
+  expect_error(get_value_from_codes(NULL, column = "sex", nrcode = NA,
+                                    list_codes_values))
+
+  data <- data.frame("sex" = c(1, 2, 3, 1, 2),
+                    "Name" = c("John", "Dora", "Dora", "John", "John"))
+  list_codes_values <- list(c(1, 2, 3), c("F", "M", "Other"))
+  ans <- get_value_from_codes(data, column = "sex", nrcode = NA,
+                                     list_codes_values)
+  expect_equal(ans, c("F", "M", "Other", "F", "M"))
+
+  data <- data.frame("sex" = c(1, 2, 3, 1, NA),
+                    "Name" = c("John", "Dora", "Dora", "John", "John"))
+  list_codes_values <- list(c(1, 2, 3), c("F", "M", "Other"))
+  ans <- get_value_from_codes(data, column = "sex", nrcode = NA,
+                              list_codes_values)
+  expect_equal(ans, c("F", "M", "Other", "F", NA))
 })
 # ############################################################################
 context("testing column contents")
@@ -192,21 +220,16 @@ test_that("test column contents", {
   colnames(tempdata) <- c("name", "age")
   expect_error(test_column_contents(tempdata, "sex", c("f", "M"), 99),
     "Column name does not exist",
-    fixed = TRUE
-  )
+    fixed = TRUE)
   x <- c(1, 2, 3, 4, 1, 3, 99)
   y <- c(1, 2, 3, 4, 5, 6, 7)
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "level")
   expect_identical(test_column_contents(
-    tempdata, "level",
-    c(1, 2, 3, 4, 5), 99
-  ), 0)
+    tempdata, "level", c(1, 2, 3, 4, 5), 99), 0)
 
   expect_identical(test_column_contents(
-    tempdata, "level",
-    c(1, 2, 3), 99
-  ), -2)
+    tempdata, "level", c(1, 2, 3), 99), -2)
 })
 # # ############################################################################
 context("testing the column number for column name")
@@ -371,18 +394,16 @@ test_that("testing descriptive statistics", {
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "age")
   results <- matrix(c(
-    249, 62.25, 73.72189, 44.5, 0, 36.86, 0, 160, 4,
-    8.25, 98.5, 0.825, 153.85
-  ), nrow = 1, byrow = TRUE)
+    "249", "62.25", "73.722", "44.5", "0", "36.861", "0", "160", "0 - 160", "4",
+    "8.25", "98.5", "0.825", "153.85", "0"), nrow = 1, byrow = TRUE)
   colnames(results) <- c(
     "Sum", "Mean", "SD", "Median", "Mode", "SE",
-    "Minimum", "Maximum", "Count", "LQ", "UQ", "95%CI.low", "95%CI.high"
+    "Minimum", "Maximum", "Range", "Count", "LQ", "UQ", "CIlow",
+    "CIhigh", "MissingCount"
   )
   rownames(results) <- "age"
-  expect_equal(descriptive_stats_col(tempdata, "age", NA), results,
-               tolerance = 0.001)
-  descriptive_stats_col(tempdata, "age", NA)
-})
+  expect_equal(descriptive_stats_col_excl_nrcode(tempdata, "age", NA), results)
+ })
 
 context("testing descriptive statistics")
 test_that("testing descriptive statistics", {
@@ -391,19 +412,18 @@ test_that("testing descriptive statistics", {
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "age")
   results <- matrix(c(
-    249, 83, 74.62573, 78, 11, 43.08519,
-    11, 160, 3, 44.5, 119, 14.35, 155.9
+    "249", "83", "74.626", "78", "11", "43.085",
+    "11", "160", "11 - 160", "3", "44.5", "119", "14.35", "155.9", "1"
   ), nrow = 1, byrow = TRUE)
   colnames(results) <- c(
-    "Sum", "Mean", "SD", "Median", "Mode",
-    "SE", "Minimum", "Maximum", "Count", "LQ", "UQ",
-    "95%CI.low", "95%CI.high"
+    "Sum", "Mean", "SD", "Median", "Mode", "SE",
+    "Minimum", "Maximum", "Range", "Count", "LQ", "UQ", "CIlow",
+    "CIhigh", "MissingCount"
   )
   rownames(results) <- "age"
-  expect_equal(descriptive_stats_col(tempdata, "age", 0), results,
+  expect_equal(descriptive_stats_col_excl_nrcode(tempdata, "age", 0), results,
                tolerance = 0.001)
 })
-
 context("testing descriptive statistics")
 test_that("testing descriptive statistics", {
   x <- c(0, NA, 78, 160)
@@ -411,19 +431,16 @@ test_that("testing descriptive statistics", {
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "age")
   results <- matrix(c(
-    238, 79.33333, 80.00833, 78, 0, 46.19283, 0, 160,
-    3, 39, 119, 3.9, 155.9
-  ), nrow = 1, byrow = TRUE)
+    "238", "79.333", "80.008", "78", "0", "46.193", "0", "160", "0 - 160",
+    "3", "39", "119", "3.9", "155.9", "1"), nrow = 1, byrow = TRUE)
   colnames(results) <- c(
     "Sum", "Mean", "SD", "Median",
-    "Mode", "SE", "Minimum", "Maximum", "Count", "LQ", "UQ",
-    "95%CI.low", "95%CI.high"
+    "Mode", "SE", "Minimum", "Maximum", "Range", "Count", "LQ", "UQ",
+    "CIlow", "CIhigh", "MissingCount"
   )
   rownames(results) <- "age"
-  expect_equal(descriptive_stats_col(tempdata, "age", NA),
-    results,
-    tolerance = 0.001
-  )
+  expect_equal(descriptive_stats_col_excl_nrcode(tempdata, "age", NA),
+    results)
 })
 
 context("testing descriptive statistics")
@@ -432,7 +449,7 @@ test_that("testing descriptive statistics", {
   y <- c(1, 2, 3, 4)
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "age")
-  expect_error(descriptive_stats_col(tempdata, "age", NA),
+  expect_error(descriptive_stats_col_excl_nrcode(tempdata, "age", NA),
     "Error - column contents not numeric",
     fixed = TRUE
   )
@@ -443,10 +460,23 @@ test_that("testing descriptive statistics", {
   y <- c(1, 2, 3, 4)
   tempdata <- as.data.frame(cbind(y, x))
   colnames(tempdata) <- c("name", "dose")
-  expect_error(descriptive_stats_col(tempdata, "age", NA),
+  expect_error(descriptive_stats_col_excl_nrcode(tempdata, "age", NA),
     "Error - no column or column name different",
     fixed = TRUE
   )
+})
+# ############################################################################
+context("testing keep required variables")
+test_that("testing keep required variables", {
+  the_data <- data.frame("Age" = c(21, 15), "sex" = c("m", "f"))
+  ans <- keep_required_columns("Age", the_data)
+  expect_equal(ans$Age, c(21, 15))
+  expect_error(keep_required_columns("num", the_data))
+  ans <- keep_required_columns(c("Age", NULL), the_data)
+  expect_equal(ans$Age, c(21, 15))
+  expect_error(keep_required_columns(NA, the_data))
+  expect_error(keep_required_columns(c(NULL), the_data))
+  expect_error(keep_required_columns(NULL, the_data))
 })
 
 # ############################################################################
@@ -511,7 +541,24 @@ test_that("testing column existence", {
   colnames(tempdata) <- c("name", "num")
   expect_equal(check_column_exists("age", tempdata), -1)
 })
+# ############################################################################
+context("testing returning a subgroup with NA")
+test_that("testing returning a subgroup with NA", {
+  x <- c(0, 11, 78, 160)
+  y1 <- c("f", "m", "f", NA)
+  y2 <- c(1, 2, 3, 4)
+  tempdata <- as.data.frame(cbind(y2, y1, x))
+  colnames(tempdata) <- c("num", "gender", "mark")
+  subgp <- tempdata[is.na(tempdata$gender), ]
+  expect_equal(return_subgroup_withNA(tempdata, "gender", NA), subgp)
 
+  x <- c(0, 11, 78, 160)
+  y1 <- c("f", "m", "f", NA)
+  y2 <- c(1, 2, 3, 4)
+  tempdata <- as.data.frame(cbind(y2, y1, x))
+  colnames(tempdata) <- c("num", "vv", "mark")
+  expect_error(return_subgroup_withNA(tempdata, "gender", "f"))
+})
 # ############################################################################
 context("testing returning a subgroup omitting NA")
 test_that("testing returning a subgroup omitting NA", {
@@ -546,8 +593,8 @@ test_that("testing returning a subgroup omitting NA", {
   )
 })
 # ############################################################################
-context("testing representing categorical data")
-test_that("testing representing categorical data", {
+context("testing representing categorical data while excluding missing data")
+test_that("testing represnting categorical data  excluding missing data", {
   x <- c(0, 11, 78, 160)
   y1 <- c("f", "m", "f", "m")
   y2 <- c(1, 2, 3, 4)
@@ -556,9 +603,11 @@ test_that("testing representing categorical data", {
   ans <- matrix(c(2, 50, 2, 50), ncol = 2)
   colnames(ans) <- c("F", "M")
   rownames(ans) <- c("Number", "Percentage")
-  expect_equal(represent_categorical_data(tempdata, "gender", NA), ans)
+  expect_equal(represent_categorical_data_exclude_missing(tempdata, "gender",
+                                                          NA), ans)
   colnames(tempdata) <- c("num", "a", "mark")
-  expect_error(represent_categorical_data(tempdata, "gender", NA),
+  expect_error(represent_categorical_data_exclude_missing(tempdata, "gender",
+                                                          NA),
     "Data does not contain the column with the specfied column name",
     fixed = TRUE
   )
@@ -571,7 +620,8 @@ test_that("testing representing categorical data", {
   ans <- matrix(c(1, 25, 2, 50), ncol = 2)
   colnames(ans) <- c("F", "M")
   rownames(ans) <- c("Number", "Percentage")
-  expect_equal(represent_categorical_data(tempdata, "gender", -99), ans)
+  expect_equal(represent_categorical_data_exclude_missing(tempdata, "gender",
+                                                          -99), ans)
 
   x <- c(0, 11, 3, 99)
   y1 <- c("f", "m", "NA", "m")
@@ -581,7 +631,72 @@ test_that("testing representing categorical data", {
   ans <- matrix(c(1, 25, 2, 50, 1, 25), ncol = 3)
   colnames(ans) <- c("F", "M", "NA")
   rownames(ans) <- c("Number", "Percentage")
-  expect_equal(represent_categorical_data(tempdata, "gender", NA), ans)
+  expect_equal(represent_categorical_data_exclude_missing(tempdata, "gender",
+                                                          NA), ans)
+})
+
+# ############################################################################
+context("testing representing categorical data while including missing data")
+test_that("testing representing categorical data including missing data", {
+  x <- c(0, 11, 78, 160, NA)
+  y1 <- c("f", "m", "f", "m", NA)
+  y2 <- c(1, 2, 3, 4, 5)
+  tempdata <- as.data.frame(cbind(y2, y1, x))
+  colnames(tempdata) <- c("num", "gender", "mark")
+  ans <- matrix(c(2, 40, 2, 40, 1, 20), ncol = 3)
+  colnames(ans) <- c("F", "M", "NA")
+  rownames(ans) <- c("Number", "Percentage")
+  expect_equal(represent_categorical_data_include_missing(tempdata, "gender",
+
+                                                          NA), ans)
+  colnames(tempdata) <- c("num", "a", "mark")
+  expect_error(represent_categorical_data_include_missing(tempdata, "gender",
+                                                          NA),
+               "Data does not contain the column with the specfied column name",
+               fixed = TRUE)
+ })
+# ############################################################################
+context("testing representing categorical data from subgroup")
+test_that("testing representing categorical data from subgroup", {
+  this.df <- data.frame(c(11, 78, 22), c("m", "f", "f"), c(1, 2, 2),
+                        stringsAsFactors = FALSE)
+  colnames(this.df) <- c("mark", "gender", "group")
+  ans <- represent_numerical_data_forsubgroups(this.df, "group",
+                                                 "mark", NA)
+  expect_error(represent_numerical_data_forsubgroups(this.df, NULL,
+                                        "mark", NA))
+  expect_error(represent_numerical_data_forsubgroups(this.df, "group",
+                                                     "xx", NA))
+})
+# ############################################################################
+context("testing representing categorical data from subgroup")
+test_that("testing representing categorical data from subgroup", {
+  this.df <- data.frame(c(11, 78, 22), c("m", "f", "f"), c(1, 2, 2),
+                        stringsAsFactors = FALSE)
+  colnames(this.df) <- c("mark", "gender", "group")
+  ans <- represent_categorical_data_forsubgroups(this.df, "group",
+                                                 "gender", NA)
+  expect_error(represent_categorical_data_forsubgroups(this.df, NULL,
+                                                       "gender", NA))
+
+  this.df <- data.frame(c(11, 78, 22), c("m", "f", "f"), c(1, 2, 2),
+                        stringsAsFactors = FALSE)
+  colnames(this.df) <- c("mark", "vv", "group")
+  expect_error(represent_categorical_data_forsubgroups(this.df, "group",
+                                                       "gender", NA))
+
+
+  this.df <- data.frame(c(11, 78, 22, 22, 33), c("m", "f", "f", "m", NA),
+                        c(1, 1, 2, 2, 2), stringsAsFactors = FALSE)
+  colnames(this.df) <- c("mark", "gender", "group")
+  ans <- represent_categorical_data_forsubgroups(this.df, "group",
+                                                       "gender", NA)
+
+  this.df <- data.frame(c(11, 78, 22, 22, 33), c("m", "f", "f", "f", NA),
+                        c(1, 1, 2, 2, 2), stringsAsFactors = FALSE)
+  colnames(this.df) <- c("mark", "gender", "group")
+  ans <- represent_categorical_data_forsubgroups(this.df, "group",
+                                                 "gender", NA)
 })
 # ############################################################################
 context("testing cohens d")
@@ -626,7 +741,7 @@ test_that("testing age calculated from date of birth", {
   ag2 <- eeptools::age_calc(as.Date("1987-06-18"), units = "years")
   ag3 <- eeptools::age_calc(as.Date("1987-07-09"), units = "years")
   ages <- c(ag1, ag2, 0, ag3)
-  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", 0)$calc_age_dob
+  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", 0)$age
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
   x <- c("1287-05-28", "1987-06-18", NA, "1987-07-09")
@@ -645,7 +760,7 @@ test_that("testing age calculated from date of birth", {
   mod_data <- calculate_age_from_dob(
     tempdata, "dob",
     "ymd", NA
-  )$calc_age_dob
+  )$age
   ages <- c(ag1, ag2, NA, ag3)
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
@@ -656,7 +771,7 @@ test_that("testing age calculated from date of birth", {
   mod_data <- calculate_age_from_dob(
     tempdata, "dob",
     "ymd", NA
-  )$calc_age_dob
+  )$age
   ages <- c(ag1, ag2, NA, ag3)
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
@@ -667,7 +782,7 @@ test_that("testing age calculated from date of birth", {
   mod_data <- calculate_age_from_dob(
     tempdata, "dob",
     "dmy", NA
-  )$calc_age_dob
+  )$age
   ages <- c(ag1, ag2, NA, ag3)
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
@@ -678,7 +793,7 @@ test_that("testing age calculated from date of birth", {
   mod_data <- calculate_age_from_dob(
     tempdata, "dob",
     "mdy", NA
-  )$calc_age_dob
+  )$age
   ages <- c(ag1, ag2, NA, ag3)
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
@@ -691,14 +806,14 @@ test_that("testing age calculated from date of birth", {
   ag2 <- eeptools::age_calc(as.Date("1987-06-18"), units = "years")
   ag3 <- eeptools::age_calc(as.Date("2015-07-09"), units = "years")
   ages <- c(ag1, ag2, NA, ag3)
-  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", NA)$calc_age_dob
+  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", NA)$age
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
   x <- c("1997 May 28", "1987-June-18", NA, "2015/July/09")
   y <- c(1, 2, 3, 4)
   tempdata <- as.data.frame(cbind(y, x), stringsAsFactors = FALSE)
   colnames(tempdata) <- c("name", "dob")
-  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", NA)$calc_age_dob
+  mod_data <- calculate_age_from_dob(tempdata, "dob", "ymd", NA)$age
   expect_equivalent(ages, mod_data, tolerance = 0.001)
 
   colnames(tempdata) <- c("name", "date")
@@ -735,7 +850,7 @@ context("testing representing categorical data")
 test_that("testing representing categorical data", {
   this.df <- data.frame(c(11, 78), c("m", "f"), stringsAsFactors = FALSE)
   colnames(this.df) <- c("mark", "gender")
-  result <- represent_categorical_data(this.df, "gender", NA)
+  result <- represent_categorical_data_exclude_missing(this.df, "gender", NA)
   expect_equal(result[1], 1)
 })
 # ############################################################################

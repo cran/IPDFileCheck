@@ -173,6 +173,51 @@ test_gender <- function(data, gendercode, gendercolumn = "gender",
   }
 }
 ###############################################################################
+#' Function to get the actual value of column content if its coded
+#' @param data a data frame
+#' @param column column name for value
+#' @param list_codes_values list of codes to understand the codes and value
+#' @param nrcode non response code corresponding to gender column
+#' @return 0, if success error if failure
+#' @examples
+#' data = data.frame("sex" = c(1, 2, 2, 1, 1),
+#'  "Name" = c("John", "Dora","Dora", "John","John"))
+#' list_codes_values = list(c("F", "M"),c(1,2))
+#' ans <- get_value_from_codes(data, column = "sex", nrcode = NA,
+#' list_codes_values)
+#' @export
+#' @importFrom dplyr %>%
+get_value_from_codes <- function(data, column,
+                              nrcode = NA, list_codes_values) {
+     if (is.null(column)) {
+       stop("Column name cant be null")
+     } else {
+       if (is.na(column))
+         stop("Column name cant be NA")
+     }
+     if (is.null(data))
+       stop("data cant be null")
+     if (is.null(list_codes_values))
+       stop("list_codes_values cant be null")
+     if (get_columnno_fornames(data, column) > 0) {
+        h <- hash::hash(key = unlist(list_codes_values[1]),
+                 values = unlist(list_codes_values[2]))
+        leys <- h$key
+        vals <- h$values
+        ipd_codes <- unlist(data %>% dplyr::select(dplyr::all_of(column)))
+        this_values <- c()
+        for (i in seq_len(length(ipd_codes))) {
+          if (is.na(ipd_codes[i])) {
+           this_val <- NA
+          } else {
+            this_val <- vals[leys == ipd_codes[i]]
+          }
+          this_values <- append(this_values, this_val)
+        }
+        return((this_values))
+     }
+}
+###############################################################################
 #' Function to check the format of column contents
 #' @param data a data frame
 #' @param column column name for gender
@@ -374,6 +419,34 @@ get_colno_pattern_colname <- function(pattern, column_names) {
   }
 }
 #' ############################################################################
+#'  Function to keep only certain variables
+#' @param variables list of variables
+#' @param the_data data to be sub setting
+#' @return subset
+#' @examples
+#' the_data <- data.frame("Age" = c(21, 15), "sex" = c("m", "f"))
+#' variable <- "Age"
+#' keep_required_columns(variable, the_data)
+#' @export
+keep_required_columns <- function(variables, the_data) {
+  for (i in seq_len(length(variables))) {
+    if (!is.null(variables[i])) {
+      if (is.na(variables[i])) stop("Some variables are NA")
+    } else {
+      stop("Some variables are NULL, please check")
+    }
+  }
+  exists <- unlist(lapply(variables, IPDFileCheck::check_column_exists,
+                         the_data))
+  if (sum(exists) != 0) {
+    stop("Some variables do not exists in data, please check")
+  }
+  subset <- the_data[(names(the_data) %in% variables)]
+  if (ncol(subset) == 0 | nrow(subset) == 0)
+    stop(" null value provided")
+  return(subset)
+}
+#' ############################################################################
 #' Function to return mode
 #' @param v a vector
 #' @return mode
@@ -396,44 +469,48 @@ get_mode_from_vector <- function(v) {
 #' @param nrcode non response code corresponding to the column
 #' @return the descriptive statistics for success , error for failure
 #' @examples
-#' descriptive_stats_col(data.frame("age" = c(21, 15),
+#' descriptive_stats_col_excl_nrcode(data.frame("age" = c(21, 15),
 #' "Name" = c("John", "Dora")), "age", NA)
 #' @import stats
 #' @export
-descriptive_stats_col <- function(data, column_name, nrcode = NA) {
+descriptive_stats_col_excl_nrcode <- function(data, column_name, nrcode = NA) {
   col.names <- colnames(data)
   if (column_name %in% col.names) {
     if (test_data_numeric_norange(column_name, data, nrcode) == 0) {
       this_column <- data[column_name]
       if (is.na(nrcode)) {
+        missing_count <- sum(is.na(this_column))
         this_column <- this_column[!is.na(data[column_name])]
       } else {
+        missing_count <- sum(this_column == nrcode)
         this_column <- this_column[data[column_name] != nrcode
         & !is.na(data[column_name])]
       }
       if (length(this_column) == 0) {
         return(0)
       } else {
-        this_sum <- sum(this_column)
-        this_av <- mean(this_column)
-        this_med <- median(this_column)
-        this_mode <- get_mode_from_vector(this_column)
-        this_range_low <- min(this_column)
-        this_range_high <- max(this_column)
-        this_sd <- sd(this_column)
-        this_se <- this_sd / sqrt(length(this_column))
+        this_sum <- round(sum(this_column), 3)
+        this_av <- round(mean(this_column), 3)
+        this_med <- round(median(this_column), 3)
+        this_mode <- round(get_mode_from_vector(this_column), 3)
+        this_range_low <- round(min(this_column), 3)
+        this_range_high <- round(max(this_column), 3)
+        this_sd <- round(sd(this_column), 3)
+        this_se <- round(this_sd / sqrt(length(this_column)), 3)
         this_lq <- quantile(this_column, c(0.25))
         this_uq <- quantile(this_column, c(0.75))
         this_ci_low <- quantile(this_column, c(0.025))
         this_ci_high <- quantile(this_column, c(0.975))
+        this_range <- paste(this_range_low, "-", this_range_high)
         results <- matrix(c(
           this_sum, this_av, this_sd, this_med, this_mode,
-          this_se, this_range_low, this_range_high,
-          length(this_column), this_lq, this_uq, this_ci_low, this_ci_high
+          this_se, this_range_low, this_range_high, this_range,
+          length(this_column), this_lq, this_uq, this_ci_low, this_ci_high,
+          missing_count
         ), byrow = TRUE, nrow = 1)
         colnames(results) <- c(
           "Sum", "Mean", "SD", "Median", "Mode", "SE", "Minimum", "Maximum",
-          "Count", "LQ", "UQ", "95%CI.low", "95%CI.high"
+          "Range", "Count", "LQ", "UQ", "CIlow", "CIhigh", "MissingCount"
         )
         rownames(results) <- column_name
         return(results)
@@ -474,7 +551,7 @@ check_column_exists <- function(column_name, data) {
 #' ), "age", NA)
 #' @export
 present_mean_sd_rmna_text <- function(data, column_name, nrcode = NA) {
-  desc <- descriptive_stats_col(data, column_name, nrcode)
+  desc <- descriptive_stats_col_excl_nrcode(data, column_name, nrcode)
     desc <- data.frame(desc)
     this_mean <- as.numeric(desc$Mean)
     this_sd <- as.numeric(desc$SD)
@@ -500,6 +577,55 @@ return_subgroup_omitna <- function(data, variable, value) {
     column_no <- get_columnno_fornames(data, variable)
     subgroup <- data[which(data[column_no] == value &
                              !is.na(data[column_no])), ]
+    return(subgroup)
+  } else {
+    stop("Data does not contain the column with the specfied column name")
+  }
+}
+###############################################################################
+#' Function to return a subgroup when certain variable equals the given value
+#' while omitting those with NA
+#' @param data data frame
+#' @param variable that corresponds to a column
+#' @param value a value that can be taken by the variable
+#' @examples
+#' return_subgroup_omitna(data.frame(
+#'   "age" = c(21, 15),
+#'   "Name" = c("John", "Dora")
+#' ), "age", 10)
+#' @return subgroup a data frame if success error if failure
+#' @export
+return_subgroup_omitna <- function(data, variable, value) {
+  if (check_column_exists(variable, data) == 0) {
+    column_no <- get_columnno_fornames(data, variable)
+    subgroup <- data[which(data[column_no] == value &
+                             !is.na(data[column_no])), ]
+    return(subgroup)
+  } else {
+    stop("Data does not contain the column with the specfied column name")
+  }
+}
+###############################################################################
+#' Function to return a subgroup when certain variable equals the given value
+#' while omitting those with NA
+#' @param data data frame
+#' @param variable that corresponds to a column
+#' @param value a value that can be taken by the variable
+#' @examples
+#' return_subgroup_withNA(data.frame(
+#'   "age" = c(21, 15),
+#'   "Name" = c("John", "Dora")
+#' ), "age", 10)
+#' @return subgroup a data frame if success error if failure
+#' @export
+return_subgroup_withNA <- function(data, variable, value) {
+  if (check_column_exists(variable, data) == 0) {
+    column_no <- get_columnno_fornames(data, variable)
+    if (is.na(value)) {
+      subgroup <- data[is.na(data[column_no]), ]
+    } else {
+      subgroup <- data[which(data[column_no] == value), ]
+    }
     return(subgroup)
   } else {
     stop("Data does not contain the column with the specfied column name")
@@ -558,9 +684,10 @@ get_sem <- function(x) {
 #' @examples
 #' this.df <- data.frame(c(11, 78), c("m", "f"), stringsAsFactors = FALSE)
 #' colnames(this.df) <- c("mark", "gender")
-#' represent_categorical_data(this.df, "gender", NA)
+#' represent_categorical_data_exclude_missing(this.df, "gender", NA)
 #' @export
-represent_categorical_data <- function(data, variable, nrcode = NA) {
+represent_categorical_data_exclude_missing <- function(data, variable,
+                                                       nrcode = NA) {
   coding <- unique(toupper(factor(data[[variable]])))
   if (is.na(nrcode)) {
     coding <- coding[!is.na(coding)]
@@ -601,6 +728,45 @@ represent_categorical_data <- function(data, variable, nrcode = NA) {
   }
 }
 #############################################################################
+#' Function to find the number and percentages of categories
+#' @param data, a data frame
+#' @param variable the column name
+#' @param nrcode non response code
+#' @return number and percentages or error if failure
+#' @examples
+#' this.df <- data.frame(c(11, 78), c("m", "f"), stringsAsFactors = FALSE)
+#' colnames(this.df) <- c("mark", "gender")
+#' represent_categorical_data_include_missing(this.df, "gender", NA)
+#' @export
+represent_categorical_data_include_missing <- function(data, variable,
+                                                       nrcode = NA) {
+  coding <- unique(toupper(factor(data[[variable]])))
+  num_categories <- length(coding)
+  if (check_column_exists(variable, data) == 0) {
+    ans <- rep(0, 2 * num_categories)
+    all_names <- list()
+    uppervals <- toupper(factor(data[[variable]]))
+    for (i in 1:num_categories) {
+      if (is.na(coding[i])) {
+        num <- nrow(data[which(is.na(uppervals)), ])
+      } else {
+        num <- nrow(data[which(uppervals == coding[i]), ])
+      }
+      perc <- 100 * num / nrow(data)
+      ans[2 * i] <- round(perc, 2)
+      ans[2 * i - 1] <- round(num, 2)
+      names_here <- c(paste(coding[i]))
+      all_names <- c(all_names, names_here)
+    }
+    mat_ans <- matrix(ans, ncol = length(coding))
+    colnames(mat_ans) <- all_names
+    rownames(mat_ans) <- c("Number", "Percentage")
+    return(mat_ans)
+  } else {
+    stop("Data does not contain the column with the specfied column name")
+  }
+}
+#############################################################################
 #' Function to represent categorical data in the form - numbers (percentage)
 #' @param data data frame
 #' @param variable column name
@@ -612,11 +778,11 @@ represent_categorical_data <- function(data, variable, nrcode = NA) {
 #' represent_categorical_textdata(df, "gender", NA)
 #' @export
 represent_categorical_textdata <- function(data, variable, nrcode) {
-  intresult <- represent_categorical_data(data, variable, nrcode)
+  intresult <- represent_categorical_data_include_missing(data, variable,
+                                                          nrcode)
   ans <- rep(0, ncol(intresult))
   i <- 1
   while (i <= ncol(intresult)) {
-    print(i)
     num <- intresult[1, i]
     perc <- intresult[2, i]
     temp <- c(paste(round(num, 2), " (", round(perc, 2), ")", sep = ""))
@@ -626,6 +792,123 @@ represent_categorical_textdata <- function(data, variable, nrcode) {
   names(ans) <- colnames(intresult)
   return(ans)
 }
+
+#############################################################################
+#' Function to find the number and percentages of categories
+#' @param data, a data frame
+#' @param variable1 the column name of the variable to be grouped based on
+#' @param variable2 the column name of the variable to represented
+#' @param nrcode non response code for the variable2
+#' @return the subgroup
+#' @examples
+#' this.df <- data.frame(c(11, 78,22), c("m", "f", "f"), c(1,2,2),
+#' stringsAsFactors = FALSE)
+#' colnames(this.df) <- c("mark", "gender", "group")
+#' represent_categorical_data_forsubgroups(this.df, "group", "gender", NA)
+#' @export
+represent_categorical_data_forsubgroups <- function(data, variable1, variable2,
+                                                    nrcode = NA) {
+  if (is.null(variable1) | is.null(variable2) | is.null(data)) {
+    stop("Some of the arguments are NULL")
+  }
+  cols_shouldhave <- c(variable1, variable2)
+  resuts <- sum(unlist(lapply(cols_shouldhave, check_column_exists, data)))
+  if (resuts != 0) {
+    stop("Some variables are not in the data")
+  } else {
+    coding <- unique(toupper(factor(data[[variable1]])))
+    variables <- unique(toupper(factor(data[[variable2]])))
+    coding_len <- length(coding)
+    var_len <- length(variables)
+    all_list <-  c()
+    for (i in seq_len(length(coding))) {
+      this_subgroup1 <- return_subgroup_withNA(data, variable1, coding[i])
+      this_rep <- (represent_categorical_data_include_missing(
+        this_subgroup1, variable2, nrcode))
+      if (ncol(this_rep) < var_len) {
+        not_repr <- c()
+        for (j in seq_len(var_len)) {
+          if (is.na(variables[j])) {
+            check <- sum("NA" %in% colnames(this_rep))
+          } else {
+            check <- variables[j] %in% colnames(this_rep)
+          }
+          if (!check)
+            not_repr <- append(not_repr, variables[j])
+        }
+        num_not_repr <- length(not_repr)
+        new_col <- rep(0, nrow(this_rep))
+        new_colnames <- append(colnames(this_rep), not_repr)
+        for (i in seq_len(num_not_repr)) {
+          this_rep <- cbind(this_rep, new_col)
+        }
+        colnames(this_rep) <- new_colnames
+        this_rep <- this_rep[, order(colnames(this_rep))]
+      }
+      this_rep <- this_rep[, order(colnames(this_rep))]
+      names_list <- (colnames(this_rep))
+      all_list <- cbind(all_list, this_rep)
+    }
+    all_list <- data.frame(all_list)
+    row.names(all_list) <- row.names(this_rep)
+    out <- kableExtra::kbl(all_list, "html", booktabs = T, align = c("r"),
+               col.names = rep(names_list, coding_len))
+    out2 <- kableExtra::kable_styling(out, "striped", full_width = F,
+                                      position = "left", font_size = 12)
+    header <- rep(var_len, coding_len)
+    names(header) <- coding
+    header <- c("", header)
+    out3 <- kableExtra::add_header_above(out2, header = header)
+    return(out3)
+  }
+}
+#############################################################################
+#' Function to find the number and percentages of categories
+#' @param data, a data frame
+#' @param variable1 the column name of the variable to be grouped based on
+#' (categorical column)
+#' @param variable2 the column name of the variable to represented
+#' (numerical data)
+#' @param nrcode non response code for the variable2
+#' @return the subgroup
+#' @examples
+#' this.df <- data.frame(c(11, 78,22), c("m", "f", "f"), c(1,2,2),
+#' stringsAsFactors = FALSE)
+#' colnames(this.df) <- c("mark", "gender", "group")
+#' represent_numerical_data_forsubgroups(this.df, "group", "mark", NA)
+#' @export
+represent_numerical_data_forsubgroups <- function(data, variable1, variable2,
+                                                    nrcode = NA) {
+  if (is.null(variable1) | is.null(variable2) | is.null(data)) {
+    stop("Some of the arguments are NULL")
+  }
+  cols_shouldhave <- c(variable1, variable2)
+  resuts <- sum(unlist(lapply(cols_shouldhave, check_column_exists, data)))
+  if (resuts != 0) {
+    stop("Some variables are not in the data")
+  } else {
+    coding <- unique(toupper(factor(data[[variable1]])))
+    all_list <- new_list <- c()
+    for (i in seq_len(length(coding))) {
+      this_subgroup1 <- return_subgroup_withNA(data, variable1, coding[i])
+      this_rep <- data.frame(descriptive_stats_col_excl_nrcode(this_subgroup1,
+                                                    variable2, nrcode))
+      if (nrow(this_rep) < 1) {
+        this_rep <- rep(0, 15)
+      }
+      all_list <- rbind(all_list, this_rep)
+    }
+    all_list <- data.frame(all_list)
+    new_list <- as.data.frame(append(new_list, coding))
+    colnames(new_list) <- "Group"
+    newlist <- data.frame(append(new_list, all_list))
+    out <- kableExtra::kbl(newlist, "html", booktabs = T, align = c("l"))
+    out2 <- kableExtra::kable_styling(out, "striped", full_width = F,
+                        position = "left", font_size = 12)
+    return(out2)
+  }
+}
+
 
 ################################################################################
 #' Function that convert a number represented as character array
@@ -639,7 +922,7 @@ convert_to_number <- function(character_array) {
   ending <- length(character_array)
   for (i in 1:ending) {
     converted <- converted +
-      suppressWarnings(as.numeric(character_array[i]) * 10^(ending - i))
+      suppressWarnings(as.numeric(character_array[i]) * 10 ^ (ending - i))
   }
   if (!is.na(converted)) {
     return(converted)
@@ -837,11 +1120,11 @@ convert_date_string_stdform <- function(entry, orderby) {
   }
   if (month_index == 2) {
     if (year %% 4 != 0) {
-      if (day >= 28) {
+      if (day > 28) {
         stop("Date is not valid")
       }
     } else {
-      if (day >= 29) {
+      if (day > 29) {
         stop("Date is not valid")
       }
     }
@@ -853,7 +1136,6 @@ convert_date_string_stdform <- function(entry, orderby) {
   if (day > 31 | day < 1 | month_index > 12 | month_index < 1) {
     stop("Month or date not valid")
   }
-
   date_return <- paste(year, "-", month_index, "-", day, sep = "")
   return(date_return)
 }
@@ -875,9 +1157,10 @@ convert_date_string_stdform <- function(entry, orderby) {
 #' @export
 calculate_age_from_dob <- function(data, columnname, dateformat = "dmy",
                                    nrcode = NA) {
-  column_no <- get_columnno_fornames(data, columnname)
+    column_no <- get_columnno_fornames(data, columnname)
     data <- as.data.frame(data, string.as.factors = FALSE)
     entry <- data[[column_no]]
+    entry <- as.character(entry)
     blanks <- c(which(entry == ""), which(is.na(entry)))
     if (length(blanks) != 0) {
       entry[blanks] <- nrcode
@@ -897,7 +1180,7 @@ calculate_age_from_dob <- function(data, columnname, dateformat = "dmy",
     if (any(non_na_ages > 150) || any(non_na_ages < 0)) {
       stop("Age can not be negative OR greater than 150")
     } else {
-      data["calc_age_dob"] <- calculated_ages
+      data["age"] <- calculated_ages
       return(data)
     }
 }

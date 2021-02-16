@@ -9,18 +9,18 @@ library(IPDFileCheck)
 
 ## -----------------------------------------------------------------------------
  set.seed(17)
- rctdata <- data.frame(age=abs(rnorm(10, 60, 20)),
-                           sex=c("M", "F","M", "F","M", "F","M", "F","F","F"),
-                           yob=sample(seq(1930,2000), 10, replace=T),
-                           dob=c("07/12/1969","16/02/1962","03/09/1978","17/02/1969",                                      "25/11/1960","17/04/1970","18/03/1997","30/01/1988",
+ rctdata <- data.frame(age = abs(rnorm(10, 60, 20)),
+                           sex = c("M", "F","M", "F","M", "F","M", "F","F","F"),
+                           yob = sample(seq(1930,2000), 10, replace = T),
+                           dob = c("07/12/1969","16/02/1962","03/09/1978","17/02/1969",                                      "25/11/1960","17/04/1970","18/03/1997","30/01/1988",
                                                "03/02/1990","25/09/1978"),
-                           arm=c("Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention"),stringsAsFactors = FALSE)
+                           arm = c("Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention"),stringsAsFactors = FALSE)
  
-rctdata_error <- data.frame(age=runif(10, -60, 120),
-                           sex=c("M", "F","M", "F","M", "F","M", "F","F","F"),
-                           yob=sample(seq(1930,2000), 10, replace=T),
-                           dob=c("1997 May 28","1987-June-18",NA,"2015/July/09","1997 May 28","1987-June-18",NA,"2015/July/09","1997 May 28","1987-June-18"),
-                           arm=c("Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention"),stringsAsFactors = FALSE)
+rctdata_error <- data.frame(age = runif(10, -60, 120),
+                           sex = c("M", "F","M", "F","M", "F","M", "F","F","F"),
+                           yob = sample(seq(1930,2000), 10, replace = T),
+                           dob = c("1997 May 28","1987-June-18", NA,"2015/July/09","1997 May 28","1987-June-18",NA,"2015/July/09","1997 May 28","1987-June-18"),
+                           arm = c("Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention","Control", "Intervention"),stringsAsFactors = FALSE)
 
 ## -----------------------------------------------------------------------------
   thisfile = system.file("extdata", "blank.txt", package = "IPDFileCheck")
@@ -65,7 +65,7 @@ get_colno_pattern_colname("ob",colnames(rctdata))
 
 
 ## -----------------------------------------------------------------------------
-descriptive_stats_col(rctdata, "age")
+descriptive_stats_col_excl_nrcode(rctdata, "age")
 
 ## -----------------------------------------------------------------------------
 present_mean_sd_rmna_text(rctdata, "age")
