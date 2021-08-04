@@ -497,10 +497,10 @@ descriptive_stats_col_excl_nrcode <- function(data, column_name, nrcode = NA) {
         this_range_high <- round(max(this_column), 3)
         this_sd <- round(sd(this_column), 3)
         this_se <- round(this_sd / sqrt(length(this_column)), 3)
-        this_lq <- quantile(this_column, c(0.25))
-        this_uq <- quantile(this_column, c(0.75))
-        this_ci_low <- quantile(this_column, c(0.025))
-        this_ci_high <- quantile(this_column, c(0.975))
+        this_lq <- round(quantile(this_column, c(0.25)), 3)
+        this_uq <- round(quantile(this_column, c(0.75)), 3)
+        this_ci_low <- round(quantile(this_column, c(0.025)), 3)
+        this_ci_high <- round(quantile(this_column, c(0.975)), 3)
         this_range <- paste(this_range_low, "-", this_range_high)
         results <- matrix(c(
           this_sum, this_av, this_sd, this_med, this_mode,
@@ -851,6 +851,7 @@ represent_categorical_data_forsubgroups <- function(data, variable1, variable2,
     }
     all_list <- data.frame(all_list)
     row.names(all_list) <- row.names(this_rep)
+
     out <- kableExtra::kbl(all_list, "html", booktabs = T, align = c("r"),
                col.names = rep(names_list, coding_len))
     out2 <- kableExtra::kable_styling(out, "striped", full_width = F,
@@ -859,7 +860,11 @@ represent_categorical_data_forsubgroups <- function(data, variable1, variable2,
     names(header) <- coding
     header <- c("", header)
     out3 <- kableExtra::add_header_above(out2, header = header)
-    return(out3)
+    results <- structure(list(
+      list_results = all_list,
+      table_results = out3
+    ))
+    return(results)
   }
 }
 #############################################################################
@@ -899,13 +904,18 @@ represent_numerical_data_forsubgroups <- function(data, variable1, variable2,
       all_list <- rbind(all_list, this_rep)
     }
     all_list <- data.frame(all_list)
-    new_list <- as.data.frame(append(new_list, coding))
-    colnames(new_list) <- "Group"
-    newlist <- data.frame(append(new_list, all_list))
-    out <- kableExtra::kbl(newlist, "html", booktabs = T, align = c("l"))
+    new_list <- cbind(coding, all_list)
+    new_list <- data.frame(new_list)
+    colnames(new_list) <- append("Group",colnames(all_list))
+    rownames(new_list) <- NULL
+    out <- kableExtra::kbl(new_list, "html", booktabs = T, align = c("l"))
     out2 <- kableExtra::kable_styling(out, "striped", full_width = F,
                         position = "left", font_size = 12)
-    return(out2)
+    results <- structure(list(
+      list_results = new_list,
+      table_results = out2
+    ))
+    return(results)
   }
 }
 
@@ -1157,7 +1167,8 @@ convert_date_string_stdform <- function(entry, orderby) {
 #' calculate_age_from_dob(this.df, "dob", NULL, "ymd")
 #' @importFrom eeptools age_calc
 #' @export
-calculate_age_from_dob <- function(data, columnname, enddatecol = NULL, dateformat = "dmy",
+calculate_age_from_dob <- function(data, columnname, enddatecol = NULL,
+                                   dateformat = "dmy",
                                    nrcode = NA) {
     column_no <- get_columnno_fornames(data, columnname)
     data <- as.data.frame(data, string.as.factors = FALSE)
@@ -1176,10 +1187,10 @@ calculate_age_from_dob <- function(data, columnname, enddatecol = NULL, dateform
     mod_entry <- convert_date_numeric_stdform(entry, index,
                                               orderby = dateformat)
     if (is.null(enddatecol)) {
-      enddate = Sys.Date()
+      enddate <- Sys.Date()
     } else {
       if (is.na(enddatecol)) {
-        enddate = Sys.Date()
+        enddate <- Sys.Date()
       } else {
         enddate <- as.character(data[[enddatecol]])
         mod_end_entry <- convert_date_numeric_stdform(enddate, index,
@@ -1187,7 +1198,7 @@ calculate_age_from_dob <- function(data, columnname, enddatecol = NULL, dateform
         enddate <- as.Date(mod_end_entry[index])
       }
     }
-    result <- eeptools::age_calc(as.Date(mod_entry[index]), enddate , units = "years")
+    result <- eeptools::age_calc(as.Date(mod_entry[index]), enddate, units = "years")
     calculated_ages[index] <- result
     calculated_ages[blanks] <- NA
     non_na_ages <- calculated_ages[!is.na(calculated_ages)]
@@ -1228,7 +1239,7 @@ calculate_age_from_year <- function(data, columnname, endyearcol = NULL, nrcode 
       } else {
         res <- sum(is.na(suppressWarnings(as.numeric(data[[endyearcol]]))))
         if (res == 0) {
-          this_year = as.numeric(data[[endyearcol]])
+          this_year <- as.numeric(data[[endyearcol]])
         } else {
           stop("The year is not numeric")
         }
@@ -1281,4 +1292,131 @@ get_contents_cols <- function(data, colname) {
   } else {
     stop("Data does not contain the column with the specfied column name")
   }
+}
+########################################################################
+#' Function to get the effect size
+#' @param data a data frame
+#' @param variable  variables to be selected for summary
+#' @param by   A column name (quoted or unquoted) in data.
+#' @param ... extra parameters required
+#' @return returns the effect sizes
+#' @export
+get_effect_size <- function(data, variable, by, ...) {
+  # Cohen's D
+  d <- effsize::cohen.d(data[[variable]] ~ as.factor(data[[by]]),
+                        conf.level = .95, pooled = TRUE, paired = FALSE,
+                        hedges.correction = TRUE)
+  # Formatting statistic with CI
+  est <- gtsummary::style_sigfig(d$estimate)
+  ci <- gtsummary::style_sigfig(d$conf.int) %>% paste(collapse = ", ")
+
+  # returning estimate with CI together
+  stringr::str_glue("{est} ({ci})")
+}
+############################################################################
+#' Function to return the summary table using gtsummary package
+#' @param the_data a data frame
+#' @param selectvar variables to be selected for summary
+#' @param byvar A column name (quoted or unquoted) in data.
+#' Summary statistics will be calculated separately for each level
+#' of the by variable. If NULL, summary statistics are calculated
+#' using all observations.
+#' @param label List of formulas specifying variables labels,
+#' @return the summary using gtsummarys  tbl_summary option
+#' @examples
+#' trial <- gtsummary::trial
+#' table1 <- get_summary_gtsummary(trial, c("trt", "age", "grade"),
+#' byvar = "trt")
+#' @export
+get_summary_gtsummary <- function(the_data, selectvar, byvar = NULL,
+                                  label = NULL){
+  wilcoxtest <- function(data, variable, by, ...) {
+    wilcox.test(data[[variable]] ~ as.factor(data[[by]]), data = data)$p.value
+  }
+  if (is.null(the_data)) {
+    stop("data cant be null")
+  }
+  if (is.null(selectvar)) {
+    stop("selectvar cant be null")
+  } else {
+    if (sum(is.na(selectvar)) == length(selectvar)) {
+      stop("selectvar cant be NA")
+    }
+  }
+  subset_data <- dplyr::select(the_data, selectvar)
+  if (is.null(byvar)) {
+    summary_table <-
+      gtsummary::tbl_summary(
+        subset_data,
+        by = byvar, # split table by group
+        digits = everything() ~ 2,
+        type = where(is.numeric) ~ "continuous2",
+        statistic = where(is.numeric) ~ c("{N_nonmiss}",
+                                          "{mean} ({sd})",
+                                          "{median} ({p25}, {p75})",
+                                          "{min}, {max}"),
+        missing =  "always",
+      ) %>%
+      gtsummary::add_n() %>% # add column with total number of non-missing observations
+      gtsummary::modify_header(label = "**Variable**") %>% # update the column header
+      gtsummary::bold_labels()
+  } else{
+    summary_table <-
+      gtsummary::tbl_summary(
+        subset_data,
+        by = byvar, # split table by group
+        digits = everything() ~ 2,
+        type = where(is.numeric) ~ "continuous2",
+        statistic = where(is.numeric) ~ c("{N_nonmiss}",
+                                          "{mean} ({sd})",
+                                          "{median} ({p25}, {p75})",
+                                          "{min}, {max}"),
+        missing =  "always",
+      ) %>%
+      gtsummary::add_overall() %>%
+      gtsummary::add_n() %>% # add column with total number of non-missing observations
+      gtsummary::add_difference() %>%
+      gtsummary::add_stat(fns = where(is.numeric) ~ get_effect_size) %>%
+      gtsummary::modify_header(add_stat_1 ~ "**Difference in mean**")%>%
+      gtsummary::add_stat(where(is.numeric) ~ wilcoxtest) %>%
+      gtsummary::modify_header(add_stat_2 ~ "**p value for Median**")%>%
+      gtsummary::modify_header(label = "**Variable**") %>% # update the column header
+      gtsummary::bold_labels()
+  }
+
+  return(summary_table)
+}
+#####################################################
+#' Function to get the longitudinal summary mean and sd
+#' @param thedata a data frame
+#' @param columnnames  column names of the data that are some observations
+#' at some time points
+#' @param nrcode the non response code in the data
+#' @return returns the effect sizes
+#' @export
+#' @examples
+#' test_data <- as.data.frame(cbind(c(1,2,3,4,5), c(20,40,60,80,100),
+#' c("F", "F", "M", "M", "F")))
+#' colnames(test_data) <- c("no", "marks", "gender")
+#' test_data$marks <- as.numeric(test_data$marks)
+#' results <- return_longitudinal_summary(test_data, "marks", NA)
+return_longitudinal_summary <- function(thedata, columnnames, nrcode = NA){
+ result <- unlist(lapply(columnnames, check_column_exists, thedata))
+ if (sum(result) != 0)
+   stop("Error - some columns do not exists in the data")
+means <- c()
+ se <- c()
+ for (i in 1:length(columnnames)) {
+   this_col <- columnnames[i]
+   check <- IPDFileCheck::test_data_numeric_norange(this_col, thedata)
+   if (check != 0)
+     stop("Need numerical data to estimate mean and sd")
+   res <- as.data.frame(descriptive_stats_col_excl_nrcode(thedata, this_col, nrcode))
+   this_mean = as.numeric(res$Mean)
+   this_se =  as.numeric(res$SE)
+   means <- append(means, this_mean)
+   se <- append(se, this_se)
+ }
+ results <- structure(list(means  = means, se = se ))
+ return(results)
 }
