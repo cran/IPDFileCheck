@@ -1336,54 +1336,55 @@ get_summary_gtsummary <- function(the_data, selectvar, byvar = NULL,
   if (is.null(the_data)) {
     stop("data cant be null")
   }
-  if (is.null(selectvar)) {
+  if (is.null(tidyselect::all_of(selectvar))) {
     stop("selectvar cant be null")
   } else {
-    if (sum(is.na(selectvar)) == length(selectvar)) {
+    if (sum(is.na(tidyselect::all_of(selectvar))) == length(tidyselect::all_of(selectvar))) {
       stop("selectvar cant be NA")
     }
   }
-  subset_data <- dplyr::select(the_data, selectvar)
-  if (is.null(byvar)) {
+  subset_data <- dplyr::select(the_data, tidyselect::all_of(selectvar))
+  if (is.null(tidyselect::all_of(byvar))) {
     summary_table <-
       gtsummary::tbl_summary(
         subset_data,
-        by = byvar, # split table by group
+        by = tidyselect::all_of(byvar), # split table by group
         digits = everything() ~ 2,
         type = where(is.numeric) ~ "continuous2",
         statistic = where(is.numeric) ~ c("{N_nonmiss}",
                                           "{mean} ({sd})",
                                           "{median} ({p25}, {p75})",
-                                          "{min}, {max}"),
+                                          "{min}, {max}",
+                                          "{N_miss} ({p_miss})"),
         missing =  "always",
+        missing_text = "(Missing)"
       ) %>%
-      gtsummary::add_n() %>% # add column with total number of non-missing observations
       gtsummary::modify_header(label = "**Variable**") %>% # update the column header
       gtsummary::bold_labels()
   } else{
     summary_table <-
       gtsummary::tbl_summary(
         subset_data,
-        by = byvar, # split table by group
+        by = tidyselect::all_of(byvar), # split table by group
         digits = everything() ~ 2,
         type = where(is.numeric) ~ "continuous2",
         statistic = where(is.numeric) ~ c("{N_nonmiss}",
                                           "{mean} ({sd})",
                                           "{median} ({p25}, {p75})",
-                                          "{min}, {max}"),
+                                          "{min}, {max}",
+                                          "{N_miss} ({p_miss})"),
         missing =  "always",
+        missing_text = "(Missing)"
       ) %>%
       gtsummary::add_overall() %>%
-      gtsummary::add_n() %>% # add column with total number of non-missing observations
       gtsummary::add_difference() %>%
       gtsummary::add_stat(fns = where(is.numeric) ~ get_effect_size) %>%
-      gtsummary::modify_header(add_stat_1 ~ "**Difference in mean**")%>%
+      gtsummary::modify_header(add_stat_1 ~ "**Difference in mean**") %>%
       gtsummary::add_stat(where(is.numeric) ~ wilcoxtest) %>%
-      gtsummary::modify_header(add_stat_2 ~ "**p value for Median**")%>%
+      gtsummary::modify_header(add_stat_2 ~ "**p value (Wilcox rank sum test for equal median)**") %>%
       gtsummary::modify_header(label = "**Variable**") %>% # update the column header
       gtsummary::bold_labels()
   }
-
   return(summary_table)
 }
 #####################################################
@@ -1393,18 +1394,18 @@ get_summary_gtsummary <- function(the_data, selectvar, byvar = NULL,
 #' at some time points
 #' @param nrcode the non response code in the data
 #' @return returns the effect sizes
-#' @export
 #' @examples
 #' test_data <- as.data.frame(cbind(c(1,2,3,4,5), c(20,40,60,80,100),
 #' c("F", "F", "M", "M", "F")))
 #' colnames(test_data) <- c("no", "marks", "gender")
 #' test_data$marks <- as.numeric(test_data$marks)
 #' results <- return_longitudinal_summary(test_data, "marks", NA)
+#' @export
 return_longitudinal_summary <- function(thedata, columnnames, nrcode = NA){
  result <- unlist(lapply(columnnames, check_column_exists, thedata))
  if (sum(result) != 0)
    stop("Error - some columns do not exists in the data")
-means <- c()
+ means <- c()
  se <- c()
  for (i in 1:length(columnnames)) {
    this_col <- columnnames[i]
